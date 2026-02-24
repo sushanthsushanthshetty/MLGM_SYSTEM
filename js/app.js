@@ -46,6 +46,26 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'pages/employers.html',
             controller: 'EmployersController'
         })
+        .when('/jobs', {
+            templateUrl: 'pages/jobs.html',
+            controller: 'JobsController'
+        })
+        .when('/applications', {
+            templateUrl: 'pages/applications.html',
+            controller: 'ApplicationsController'
+        })
+        .when('/admin-login', {
+            templateUrl: 'pages/admin-login.html',
+            controller: 'AdminLoginController'
+        })
+        .when('/admin-dashboard', {
+            templateUrl: 'pages/admin-dashboard.html',
+            controller: 'AdminDashboardController'
+        })
+        .when('/admin-applications', {
+            templateUrl: 'pages/admin-applications.html',
+            controller: 'AdminApplicationsController'
+        })
         .otherwise({
             redirectTo: '/'
         });

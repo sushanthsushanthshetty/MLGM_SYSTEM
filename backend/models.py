@@ -461,3 +461,217 @@ class Admin:
             return {'success': False, 'error': str(e)}
         finally:
             conn.close()
+
+
+class Job:
+    """Job model for job listings"""
+    
+    @staticmethod
+    def generate_job_id(cursor):
+        """Generate unique job ID"""
+        cursor.execute("SELECT COALESCE(MAX(CAST(SUBSTRING(job_id, 4) AS UNSIGNED)), 0) as max_id FROM jobs")
+        result = cursor.fetchone()
+        max_id = result['max_id'] if result else 0
+        return f"JOB{str(max_id + 1).zfill(5)}"
+    
+    @staticmethod
+    def create(data):
+        """Create a new job listing"""
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            job_id = Job.generate_job_id(cursor)
+            
+            cursor.execute("""
+                INSERT INTO jobs (job_id, employer_id, title, description, skill_required, location, wage_per_day, duration_days, workers_needed)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                job_id,
+                data.get('employer_id'),
+                data.get('title'),
+                data.get('description'),
+                data.get('skill_required'),
+                data.get('location'),
+                data.get('wage_per_day'),
+                data.get('duration_days'),
+                data.get('workers_needed')
+            ))
+            conn.commit()
+            job_db_id = cursor.lastrowid
+            return {'success': True, 'job_id': job_id, 'id': job_db_id}
+        except Exception as e:
+            conn.rollback()
+            return {'success': False, 'error': str(e)}
+        finally:
+            conn.close()
+    
+    @staticmethod
+    def get_all(status=None, skill=None):
+        """Get all open jobs"""
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            query = """
+                SELECT j.*, e.company_name as employer_name, e.industry
+                FROM jobs j
+                JOIN employers e ON j.employer_id = e.id
+            """
+            conditions = []
+            params = []
+            
+            if status:
+                conditions.append("j.status = %s")
+                params.append(status)
+            
+            if skill:
+                conditions.append("(j.skill_required = %s OR j.skill_required = 'other')")
+                params.append(skill)
+            
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
+            
+            query += " ORDER BY j.created_at DESC"
+            
+            cursor.execute(query, params)
+            results = cursor.fetchall()
+            return results
+        finally:
+            conn.close()
+    
+    @staticmethod
+    def get_by_id(job_id):
+        """Get job by ID"""
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT j.*, e.company_name as employer_name, e.industry, e.location as employer_location
+                FROM jobs j
+                JOIN employers e ON j.employer_id = e.id
+                WHERE j.id = %s OR j.job_id = %s
+            """, (job_id, job_id))
+            result = cursor.fetchone()
+            return result
+        finally:
+            conn.close()
+    
+    @staticmethod
+    def update_status(job_id, status):
+        """Update job status"""
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE jobs SET status = %s
+                WHERE id = %s OR job_id = %s
+            """, (status, job_id, job_id))
+            conn.commit()
+            return {'success': True}
+        except Exception as e:
+            conn.rollback()
+            return {'success': False, 'error': str(e)}
+        finally:
+            conn.close()
+
+
+class JobApplication:
+    """Job Application model"""
+    
+    @staticmethod
+    def generate_application_id(cursor):
+        """Generate unique application ID"""
+        cursor.execute("SELECT COALESCE(MAX(CAST(SUBSTRING(application_id, 4) AS UNSIGNED)), 0) as max_id FROM job_applications")
+        result = cursor.fetchone()
+        max_id = result['max_id'] if result else 0
+        return f"APP{str(max_id + 1).zfill(5)}"
+    
+    @staticmethod
+    def create(job_id, worker_id):
+        """Apply for a job"""
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            
+            # Check if already applied
+            cursor.execute("""
+                SELECT * FROM job_applications 
+                WHERE job_id = %s AND worker_id = %s
+            """, (job_id, worker_id))
+            existing = cursor.fetchone()
+            
+            if existing:
+                return {'success': False, 'error': 'You have already applied for this job'}
+            
+            application_id = JobApplication.generate_application_id(cursor)
+            
+            cursor.execute("""
+                INSERT INTO job_applications (application_id, job_id, worker_id)
+                VALUES (%s, %s, %s)
+            """, (application_id, job_id, worker_id))
+            conn.commit()
+            
+            return {'success': True, 'application_id': application_id}
+        except Exception as e:
+            conn.rollback()
+            return {'success': False, 'error': str(e)}
+        finally:
+            conn.close()
+    
+    @staticmethod
+    def get_by_worker(worker_id):
+        """Get all applications by a worker"""
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT a.*, j.title, j.job_id, j.location, j.wage_per_day, j.duration_days,
+                       e.company_name as employer_name
+                FROM job_applications a
+                JOIN jobs j ON a.job_id = j.id
+                JOIN employers e ON j.employer_id = e.id
+                WHERE a.worker_id = %s
+                ORDER BY a.applied_at DESC
+            """, (worker_id,))
+            results = cursor.fetchall()
+            return results
+        finally:
+            conn.close()
+    
+    @staticmethod
+    def update_status(application_id, status):
+        """Update application status"""
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE job_applications 
+                SET status = %s, responded_at = NOW()
+                WHERE id = %s OR application_id = %s
+            """, (status, application_id, application_id))
+            conn.commit()
+            return {'success': True}
+        except Exception as e:
+            conn.rollback()
+            return {'success': False, 'error': str(e)}
+        finally:
+            conn.close()
+    
+    @staticmethod
+    def get_stats_by_worker(worker_id):
+        """Get application statistics for a worker"""
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 
+                    COUNT(*) as total_applications,
+                    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_applications,
+                    SUM(CASE WHEN status = 'accepted' THEN 1 ELSE 0 END) as accepted_applications,
+                    SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected_applications
+                FROM job_applications
+                WHERE worker_id = %s
+            """, (worker_id,))
+            result = cursor.fetchone()
+            return result
+        finally:
+            conn.close()

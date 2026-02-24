@@ -228,6 +228,97 @@ SELECT
 FROM employers e;
 
 -- =====================================================
+-- Table: jobs
+-- Stores job listings from employers
+-- =====================================================
+CREATE TABLE IF NOT EXISTS jobs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    job_id VARCHAR(20) UNIQUE NOT NULL,
+    employer_id INT NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    description TEXT,
+    skill_required VARCHAR(50),
+    location VARCHAR(200),
+    wage_per_day DECIMAL(10,2),
+    duration_days INT,
+    workers_needed INT,
+    status ENUM('open', 'closed', 'filled') DEFAULT 'open',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (employer_id) REFERENCES employers(id) ON DELETE CASCADE
+);
+
+-- =====================================================
+-- Table: job_applications
+-- Stores worker applications for jobs
+-- =====================================================
+CREATE TABLE IF NOT EXISTS job_applications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    application_id VARCHAR(20) UNIQUE NOT NULL,
+    job_id INT NOT NULL,
+    worker_id INT NOT NULL,
+    status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    responded_at TIMESTAMP NULL,
+    FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,
+    FOREIGN KEY (worker_id) REFERENCES workers(id) ON DELETE CASCADE
+);
+
+-- =====================================================
+-- Indexes for jobs and applications
+-- =====================================================
+CREATE INDEX idx_jobs_employer ON jobs(employer_id);
+CREATE INDEX idx_jobs_status ON jobs(status);
+CREATE INDEX idx_jobs_skill ON jobs(skill_required);
+CREATE INDEX idx_applications_worker ON job_applications(worker_id);
+CREATE INDEX idx_applications_job ON job_applications(job_id);
+CREATE INDEX idx_applications_status ON job_applications(status);
+
+-- =====================================================
+-- Trigger: Auto-generate Job ID before insert
+-- =====================================================
+DELIMITER //
+CREATE TRIGGER before_job_insert
+BEFORE INSERT ON jobs
+FOR EACH ROW
+BEGIN
+    DECLARE max_id INT;
+    IF NEW.job_id IS NULL OR NEW.job_id = '' THEN
+        SELECT COALESCE(MAX(CAST(SUBSTRING(job_id, 4) AS UNSIGNED)), 0) INTO max_id FROM jobs;
+        SET NEW.job_id = CONCAT('JOB', LPAD(max_id + 1, 5, '0'));
+    END IF;
+END //
+DELIMITER ;
+
+-- =====================================================
+-- Trigger: Auto-generate Application ID before insert
+-- =====================================================
+DELIMITER //
+CREATE TRIGGER before_application_insert
+BEFORE INSERT ON job_applications
+FOR EACH ROW
+BEGIN
+    DECLARE max_id INT;
+    IF NEW.application_id IS NULL OR NEW.application_id = '' THEN
+        SELECT COALESCE(MAX(CAST(SUBSTRING(application_id, 4) AS UNSIGNED)), 0) INTO max_id FROM job_applications;
+        SET NEW.application_id = CONCAT('APP', LPAD(max_id + 1, 5, '0'));
+    END IF;
+END //
+DELIMITER ;
+
+-- =====================================================
+-- Sample Data: Jobs
+-- =====================================================
+INSERT INTO jobs (job_id, employer_id, title, description, skill_required, location, wage_per_day, duration_days, workers_needed, status) VALUES
+('JOB00001', 1, 'Electrician for Building Construction', 'Need experienced electrician for wiring work in new residential building', 'electrician', 'Mumbai, Maharashtra', 800.00, 30, 5, 'open'),
+('JOB00002', 2, 'Factory Worker - Manufacturing', 'General factory work including machine operation and quality checking', 'other', 'Pune, Maharashtra', 500.00, 60, 20, 'open'),
+('JOB00003', 4, 'Construction Workers Needed', 'Masons and laborers needed for infrastructure project', 'mason', 'Delhi NCR', 600.00, 90, 50, 'open'),
+('JOB00004', 5, 'Hotel Staff - Cook and Cleaners', 'Need cooks and housekeeping staff for hotel', 'cook', 'Bangalore, Karnataka', 450.00, 180, 10, 'open'),
+('JOB00005', 6, 'Agricultural Workers', 'Farm workers needed for harvest season', 'other', 'Nashik, Maharashtra', 400.00, 15, 30, 'open'),
+('JOB00006', 1, 'Plumber for Maintenance Work', 'Experienced plumber for maintenance work in commercial complex', 'plumber', 'Mumbai, Maharashtra', 700.00, 15, 3, 'open'),
+('JOB00007', 3, 'Textile Worker', 'Workers needed for textile manufacturing', 'other', 'Surat, Gujarat', 450.00, 30, 15, 'closed');
+
+-- =====================================================
 -- Grant privileges (adjust username as needed)
 -- =====================================================
 -- GRANT ALL PRIVILEGES ON mlgms_db.* TO 'root'@'localhost';

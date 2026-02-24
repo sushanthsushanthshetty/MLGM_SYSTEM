@@ -1,0 +1,97 @@
+<!-- Admin Applications Management Page -->
+<h2 class="page-title">Manage Job Applications</h2>
+
+<!-- Loading indicator -->
+<div ng-show="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading applications...</p>
+</div>
+
+<!-- Applications Content -->
+<div ng-show="!loading">
+    <!-- Filter Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-4 mb-2 mb-md-0">
+                    <label class="form-label mb-0 me-2">Filter by Status:</label>
+                    <select class="form-select form-select-sm d-inline-block w-auto" ng-model="filterStatus" ng-change="loadApplications()">
+                        <option value="">All</option>
+                        <option value="pending">Pending</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="col-md-4 text-center">
+                    <span class="badge bg-primary fs-6">{{applications.length}} Applications</span>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="#!/admin-dashboard" class="btn btn-sm btn-outline-secondary">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Applications List -->
+    <div class="card">
+        <div class="card-body">
+            <div ng-show="applications.length === 0" class="text-center py-4">
+                <p class="text-muted">No applications found.</p>
+            </div>
+            
+            <div class="table-responsive" ng-show="applications.length > 0">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Application ID</th>
+                            <th>Worker</th>
+                            <th>Contact</th>
+                            <th>Job Title</th>
+                            <th>Employer</th>
+                            <th>Location</th>
+                            <th>Wage/Day</th>
+                            <th>Applied On</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="app in applications">
+                            <td><strong>{{app.application_id}}</strong></td>
+                            <td>
+                                {{app.worker_name}}<br>
+                                <small class="text-muted">{{app.migrant_id}}</small>
+                            </td>
+                            <td>{{app.phone}}</td>
+                            <td>{{app.job_title}}</td>
+                            <td>{{app.employer_name}}</td>
+                            <td>{{app.location}}</td>
+                            <td>Rs.{{app.wage_per_day}}</td>
+                            <td>{{app.applied_at | date:'dd MMM yyyy'}}</td>
+                            <td><span class="status-{{app.status.toLowerCase()}}">{{app.status}}</span></td>
+                            <td>
+                                <div ng-show="app.status === 'Pending'">
+                                    <button class="btn btn-sm btn-success me-1" ng-click="acceptApplication(app)" ng-disabled="app.processing">
+                                        <span ng-show="!app.processing">Accept</span>
+                                        <span ng-show="app.processing">...</span>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" ng-click="rejectApplication(app)" ng-disabled="app.processing">
+                                        <span ng-show="!app.processing">Reject</span>
+                                        <span ng-show="app.processing">...</span>
+                                    </button>
+                                </div>
+                                <span ng-show="app.status !== 'Pending'" class="text-muted">-</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a href="#!/admin-dashboard" class="btn btn-primary">Back to Dashboard</a>
+</div>

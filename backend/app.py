@@ -20,6 +20,8 @@ from backend.routes.worker_routes import worker_bp
 from backend.routes.complaint_routes import complaint_bp
 from backend.routes.employer_routes import employer_bp
 from backend.routes.dashboard_routes import dashboard_bp
+from backend.routes.job_routes import job_bp
+from backend.routes.admin_routes import admin_bp
 
 
 def create_app(config_name='default'):
@@ -46,6 +48,8 @@ def create_app(config_name='default'):
     app.register_blueprint(complaint_bp, url_prefix='/api/complaint')
     app.register_blueprint(employer_bp, url_prefix='/api/employers')
     app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
+    app.register_blueprint(job_bp, url_prefix='/api/jobs')
+    app.register_blueprint(admin_bp, url_prefix='/api/admin')
     
     # Serve index.html for root
     @app.route('/')

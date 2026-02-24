@@ -241,6 +241,8 @@ app.controller('DashboardController', ['$scope', '$http', '$location', 'AuthServ
     
     // Dashboard menu items
     $scope.menuItems = [
+        { title: 'Find Work', icon: '💼', link: '#!/jobs', color: '#17a2b8' },
+        { title: 'My Applications', icon: '📄', link: '#!/applications', color: '#6610f2' },
         { title: 'My Profile', icon: '👤', link: '#!/profile', color: '#0d6efd' },
         { title: 'File Complaint', icon: '📝', link: '#!/complaint', color: '#dc3545' },
         { title: 'My Complaints', icon: '📋', link: '#!/complaints', color: '#ffc107' },
@@ -568,4 +570,362 @@ app.controller('EmployersController', ['$scope', '$http', '$location', 'AuthServ
         }
         return stars;
     };
+}]);
+
+// =====================================================
+// Jobs Controller - Find Work
+// =====================================================
+app.controller('JobsController', ['$scope', '$http', '$location', 'AuthService', function($scope, $http, $location, AuthService) {
+    // Check if logged in
+    if (!AuthService.isLoggedIn()) {
+        $location.path('/login');
+        return;
+    }
+    
+    $scope.jobs = [];
+    $scope.loading = true;
+    $scope.errorMessage = '';
+    $scope.filterSkill = '';
+    
+    // Skill options for filter
+    $scope.skillOptions = [
+        { value: 'electrician', label: 'Electrician' },
+        { value: 'plumber', label: 'Plumber' },
+        { value: 'carpenter', label: 'Carpenter' },
+        { value: 'mason', label: 'Mason' },
+        { value: 'painter', label: 'Painter' },
+        { value: 'welder', label: 'Welder' },
+        { value: 'driver', label: 'Driver' },
+        { value: 'cook', label: 'Cook' },
+        { value: 'cleaner', label: 'Cleaner' },
+        { value: 'other', label: 'Other' }
+    ];
+    
+    // Application stats
+    $scope.appStats = {
+        total: 0,
+        pending: 0,
+        accepted: 0,
+        rejected: 0
+    };
+    
+    // Load jobs
+    $scope.loadJobs = function() {
+        $scope.loading = true;
+        var url = API_BASE_URL + '/jobs/list?status=open';
+        if ($scope.filterSkill) {
+            url += '&skill=' + $scope.filterSkill;
+        }
+        
+        $http.get(url)
+            .then(function(response) {
+                if (response.data.success) {
+                    $scope.jobs = response.data.jobs;
+                }
+            })
+            .catch(function(error) {
+                $scope.errorMessage = 'Error loading jobs.';
+                console.error('Error loading jobs:', error);
+            })
+            .finally(function() {
+                $scope.loading = false;
+            });
+    };
+    
+    // Load application stats
+    $scope.loadAppStats = function() {
+        $http.get(API_BASE_URL + '/jobs/applications/stats')
+            .then(function(response) {
+                if (response.data.success) {
+                    $scope.appStats = response.data.stats;
+                }
+            })
+            .catch(function(error) {
+                console.error('Error loading application stats:', error);
+            });
+    };
+    
+    // Filter jobs
+    $scope.filterJobs = function() {
+        $scope.loadJobs();
+    };
+    
+    // Apply for job
+    $scope.applyForJob = function(job) {
+        job.applying = true;
+        
+        $http.post(API_BASE_URL + '/jobs/apply/' + job.id)
+            .then(function(response) {
+                if (response.data.success) {
+                    alert('Application submitted successfully! Application ID: ' + response.data.application_id);
+                    $scope.loadAppStats();
+                } else {
+                    alert(response.data.message || 'Failed to apply for job.');
+                }
+            })
+            .catch(function(error) {
+                alert(error.data?.message || 'An error occurred. Please try again.');
+            })
+            .finally(function() {
+                job.applying = false;
+            });
+    };
+    
+    // Initial load
+    $scope.loadJobs();
+    $scope.loadAppStats();
+}]);
+
+// =====================================================
+// Applications Controller - My Applications
+// =====================================================
+app.controller('ApplicationsController', ['$scope', '$http', '$location', 'AuthService', function($scope, $http, $location, AuthService) {
+    // Check if logged in
+    if (!AuthService.isLoggedIn()) {
+        $location.path('/login');
+        return;
+    }
+    
+    $scope.applications = [];
+    $scope.loading = true;
+    $scope.errorMessage = '';
+    
+    // Stats
+    $scope.stats = {
+        total: 0,
+        pending: 0,
+        accepted: 0,
+        rejected: 0
+    };
+    
+    // Load applications
+    $http.get(API_BASE_URL + '/jobs/applications')
+        .then(function(response) {
+            if (response.data.success) {
+                $scope.applications = response.data.applications;
+            }
+        })
+        .catch(function(error) {
+            $scope.errorMessage = 'Error loading applications.';
+            console.error('Error loading applications:', error);
+        })
+        .finally(function() {
+            $scope.loading = false;
+        });
+    
+    // Load stats
+    $http.get(API_BASE_URL + '/jobs/applications/stats')
+        .then(function(response) {
+            if (response.data.success) {
+                $scope.stats = response.data.stats;
+            }
+        })
+        .catch(function(error) {
+            console.error('Error loading application stats:', error);
+        });
+}]);
+
+// =====================================================
+// Capitalize Filter
+// =====================================================
+app.filter('capitalize', function() {
+    return function(input) {
+        if (!input) return '';
+        return input.charAt(0).toUpperCase() + input.slice(1);
+    };
+});
+
+// =====================================================
+// Admin Login Controller
+// =====================================================
+app.controller('AdminLoginController', ['$scope', '$http', '$location', '$window', function($scope, $http, $location, $window) {
+    $scope.loginData = {
+        username: '',
+        password: ''
+    };
+    $scope.loading = false;
+    $scope.errorMessage = '';
+    
+    $scope.adminLogin = function() {
+        if ($scope.adminLoginForm.$invalid) {
+            return;
+        }
+        
+        $scope.loading = true;
+        $scope.errorMessage = '';
+        
+        $http.post(API_BASE_URL + '/admin/login', $scope.loginData)
+            .then(function(response) {
+                if (response.data.success) {
+                    $window.localStorage.setItem('mlgms_admin', JSON.stringify(response.data.admin));
+                    $location.path('/admin-dashboard');
+                } else {
+                    $scope.errorMessage = response.data.message || 'Login failed.';
+                }
+            })
+            .catch(function(error) {
+                $scope.errorMessage = error.data?.message || 'Invalid credentials.';
+            })
+            .finally(function() {
+                $scope.loading = false;
+            });
+    };
+}]);
+
+// =====================================================
+// Admin Dashboard Controller
+// =====================================================
+app.controller('AdminDashboardController', ['$scope', '$http', '$location', '$window', function($scope, $http, $location, $window) {
+    // Check if admin is logged in
+    var admin = $window.localStorage.getItem('mlgms_admin');
+    if (!admin) {
+        $location.path('/admin-login');
+        return;
+    }
+    
+    $scope.admin = JSON.parse(admin);
+    $scope.stats = {};
+    $scope.recentApplications = [];
+    $scope.loading = true;
+    
+    // Load stats
+    $http.get(API_BASE_URL + '/admin/stats')
+        .then(function(response) {
+            if (response.data.success) {
+                $scope.stats = response.data.stats;
+            }
+        })
+        .catch(function(error) {
+            console.error('Error loading stats:', error);
+        });
+    
+    // Load recent applications
+    $http.get(API_BASE_URL + '/admin/applications')
+        .then(function(response) {
+            if (response.data.success) {
+                $scope.recentApplications = response.data.applications.slice(0, 5);
+            }
+        })
+        .catch(function(error) {
+            console.error('Error loading applications:', error);
+        })
+        .finally(function() {
+            $scope.loading = false;
+        });
+    
+    // Navigate to page
+    $scope.navigateTo = function(path) {
+        $location.path('/' + path);
+    };
+    
+    // Accept application
+    $scope.acceptApp = function(app) {
+        $http.post(API_BASE_URL + '/admin/applications/' + app.id + '/accept')
+            .then(function(response) {
+                if (response.data.success) {
+                    app.status = 'Accepted';
+                    // Reload stats
+                    $http.get(API_BASE_URL + '/admin/stats').then(function(res) {
+                        if (res.data.success) {
+                            $scope.stats = res.data.stats;
+                        }
+                    });
+                }
+            })
+            .catch(function(error) {
+                alert('Error accepting application');
+            });
+    };
+    
+    // Reject application
+    $scope.rejectApp = function(app) {
+        $http.post(API_BASE_URL + '/admin/applications/' + app.id + '/reject')
+            .then(function(response) {
+                if (response.data.success) {
+                    app.status = 'Rejected';
+                }
+            })
+            .catch(function(error) {
+                alert('Error rejecting application');
+            });
+    };
+    
+    // Logout
+    $scope.adminLogout = function() {
+        $window.localStorage.removeItem('mlgms_admin');
+        $location.path('/');
+    };
+}]);
+
+// =====================================================
+// Admin Applications Controller
+// =====================================================
+app.controller('AdminApplicationsController', ['$scope', '$http', '$location', '$window', function($scope, $http, $location, $window) {
+    // Check if admin is logged in
+    var admin = $window.localStorage.getItem('mlgms_admin');
+    if (!admin) {
+        $location.path('/admin-login');
+        return;
+    }
+    
+    $scope.applications = [];
+    $scope.filterStatus = 'pending';
+    $scope.loading = true;
+    
+    // Load applications
+    $scope.loadApplications = function() {
+        $scope.loading = true;
+        var url = API_BASE_URL + '/admin/applications';
+        if ($scope.filterStatus) {
+            url += '?status=' + $scope.filterStatus;
+        }
+        
+        $http.get(url)
+            .then(function(response) {
+                if (response.data.success) {
+                    $scope.applications = response.data.applications;
+                }
+            })
+            .catch(function(error) {
+                console.error('Error loading applications:', error);
+            })
+            .finally(function() {
+                $scope.loading = false;
+            });
+    };
+    
+    // Accept application
+    $scope.acceptApplication = function(app) {
+        app.processing = true;
+        $http.post(API_BASE_URL + '/admin/applications/' + app.id + '/accept')
+            .then(function(response) {
+                if (response.data.success) {
+                    app.status = 'Accepted';
+                    app.processing = false;
+                }
+            })
+            .catch(function(error) {
+                alert('Error accepting application');
+                app.processing = false;
+            });
+    };
+    
+    // Reject application
+    $scope.rejectApplication = function(app) {
+        app.processing = true;
+        $http.post(API_BASE_URL + '/admin/applications/' + app.id + '/reject')
+            .then(function(response) {
+                if (response.data.success) {
+                    app.status = 'Rejected';
+                    app.processing = false;
+                }
+            })
+            .catch(function(error) {
+                alert('Error rejecting application');
+                app.processing = false;
+            });
+    };
+    
+    // Initial load
+    $scope.loadApplications();
 }]);

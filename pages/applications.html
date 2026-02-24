@@ -1,0 +1,120 @@
+<!-- My Applications Page -->
+<h2 class="page-title">My Applications</h2>
+
+<!-- Loading indicator -->
+<div ng-show="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading your applications...</p>
+</div>
+
+<!-- Applications Content -->
+<div ng-show="!loading">
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-primary">{{stats.total}}</h3>
+                    <p class="mb-0 text-muted">Total Applications</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-warning">{{stats.pending}}</h3>
+                    <p class="mb-0 text-muted">Pending</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-success">{{stats.accepted}}</h3>
+                    <p class="mb-0 text-muted">Accepted</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-danger">{{stats.rejected}}</h3>
+                    <p class="mb-0 text-muted">Rejected</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Applications List -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Application History</h5>
+            <a href="#!/jobs" class="btn btn-sm btn-primary">Find More Jobs</a>
+        </div>
+        <div class="card-body">
+            <div ng-show="applications.length === 0" class="text-center py-4">
+                <p class="text-muted mb-3">You haven't applied for any jobs yet.</p>
+                <a href="#!/jobs" class="btn btn-primary">Browse Available Jobs</a>
+            </div>
+            
+            <div class="table-responsive" ng-show="applications.length > 0">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Application ID</th>
+                            <th>Job Title</th>
+                            <th>Employer</th>
+                            <th>Location</th>
+                            <th>Wage/Day</th>
+                            <th>Applied On</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="app in applications">
+                            <td><strong>{{app.application_id}}</strong></td>
+                            <td>{{app.job_title}}</td>
+                            <td>{{app.employer_name}}</td>
+                            <td>{{app.location}}</td>
+                            <td>₹{{app.wage_per_day}}</td>
+                            <td>{{app.applied_at | date:'dd MMM yyyy'}}</td>
+                            <td>
+                                <span class="status-{{app.status.toLowerCase()}}">{{app.status}}</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Legend -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Status Legend</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-2">
+                    <span class="status-pending">Pending</span>
+                    <small class="ms-2 text-muted">Application under review</small>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <span class="status-accepted">Accepted</span>
+                    <small class="ms-2 text-muted">You got the job!</small>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <span class="status-rejected">Rejected</span>
+                    <small class="ms-2 text-muted">Application declined</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a href="#!/jobs" class="btn btn-success me-2">Find More Jobs</a>
+    <a href="#!/dashboard" class="btn btn-primary">← Back to Dashboard</a>
+</div>

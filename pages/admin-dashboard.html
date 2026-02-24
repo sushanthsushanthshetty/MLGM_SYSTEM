@@ -1,0 +1,121 @@
+<!-- Admin Dashboard Page -->
+<h2 class="page-title">Admin Dashboard</h2>
+
+<!-- Loading indicator -->
+<div ng-show="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading admin dashboard...</p>
+</div>
+
+<!-- Dashboard Content -->
+<div ng-show="!loading">
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h6 class="card-title">Total Workers</h6>
+                    <h2>{{stats.total_workers}}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h6 class="card-title">Open Jobs</h6>
+                    <h2>{{stats.open_jobs}}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h6 class="card-title">Pending Applications</h6>
+                    <h2>{{stats.applications.pending || 0}}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-danger">
+                <div class="card-body">
+                    <h6 class="card-title">Pending Complaints</h6>
+                    <h2>{{stats.complaints.pending || 0}}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Cards -->
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card" ng-click="navigateTo('admin-applications')" style="border-left: 4px solid #17a2b8; cursor: pointer;">
+                <div class="card-body">
+                    <div class="card-icon" style="background-color: #17a2b8;">
+                        <span>Applications</span>
+                    </div>
+                    <h5 class="card-title">Manage Applications</h5>
+                    <p class="text-muted">Accept or reject job applications</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card" ng-click="navigateTo('admin-complaints')" style="border-left: 4px solid #dc3545; cursor: pointer;">
+                <div class="card-body">
+                    <div class="card-icon" style="background-color: #dc3545;">
+                        <span>Complaints</span>
+                    </div>
+                    <h5 class="card-title">Manage Complaints</h5>
+                    <p class="text-muted">Resolve worker grievances</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card dashboard-card" ng-click="adminLogout()" style="border-left: 4px solid #6c757d; cursor: pointer;">
+                <div class="card-body">
+                    <div class="card-icon" style="background-color: #6c757d;">
+                        <span>Logout</span>
+                    </div>
+                    <h5 class="card-title">Logout</h5>
+                    <p class="text-muted">Exit admin panel</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Applications -->
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Recent Applications</h5>
+            <button class="btn btn-sm btn-primary" ng-click="navigateTo('admin-applications')">View All</button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Application ID</th>
+                            <th>Worker</th>
+                            <th>Job</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="app in recentApplications">
+                            <td>{{app.application_id}}</td>
+                            <td>{{app.worker_name}} ({{app.migrant_id}})</td>
+                            <td>{{app.job_title}}</td>
+                            <td><span class="status-{{app.status.toLowerCase()}}">{{app.status}}</span></td>
+                            <td>
+                                <button ng-show="app.status === 'Pending'" class="btn btn-sm btn-success me-1" ng-click="acceptApp(app)">Accept</button>
+                                <button ng-show="app.status === 'Pending'" class="btn btn-sm btn-danger" ng-click="rejectApp(app)">Reject</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
