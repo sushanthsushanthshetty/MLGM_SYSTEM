@@ -1,0 +1,79 @@
+<!-- Profile Page -->
+<h2 class="page-title">My Profile</h2>
+
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <div class="card profile-card">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <div class="card-icon mx-auto" style="width: 100px; height: 100px; background-color: rgba(255,255,255,0.2);">
+                        <span style="font-size: 3rem;">👤</span>
+                    </div>
+                </div>
+                <h3>{{worker.name}}</h3>
+                <p class="mb-1">Migrant ID: {{worker.migrantId}}</p>
+                <span class="status-active">{{worker.status}}</span>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Personal Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3 pb-3 border-bottom">
+                    <div class="col-5 text-muted">Full Name</div>
+                    <div class="col-7"><strong>{{worker.name}}</strong></div>
+                </div>
+                <div class="row mb-3 pb-3 border-bottom">
+                    <div class="col-5 text-muted">Migrant ID</div>
+                    <div class="col-7"><strong>{{worker.migrantId}}</strong></div>
+                </div>
+                <div class="row mb-3 pb-3 border-bottom">
+                    <div class="col-5 text-muted">Skill</div>
+                    <div class="col-7"><strong>{{worker.skill}}</strong></div>
+                </div>
+                <div class="row mb-3 pb-3 border-bottom">
+                    <div class="col-5 text-muted">Mobile Number</div>
+                    <div class="col-7"><strong>{{worker.mobile}}</strong></div>
+                </div>
+                <div class="row mb-3 pb-3 border-bottom">
+                    <div class="col-5 text-muted">Age</div>
+                    <div class="col-7"><strong>{{worker.age}} years</strong></div>
+                </div>
+                <div class="row mb-3 pb-3 border-bottom">
+                    <div class="col-5 text-muted">Gender</div>
+                    <div class="col-7"><strong>{{worker.gender}}</strong></div>
+                </div>
+                <div class="row mb-3 pb-3 border-bottom">
+                    <div class="col-5 text-muted">Address</div>
+                    <div class="col-7"><strong>{{worker.address}}</strong></div>
+                </div>
+                <div class="row mb-3 pb-3 border-bottom">
+                    <div class="col-5 text-muted">Registration Date</div>
+                    <div class="col-7"><strong>{{worker.registrationDate}}</strong></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Employment Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3 pb-3 border-bottom">
+                    <div class="col-5 text-muted">Current Employer</div>
+                    <div class="col-7"><strong>{{worker.currentEmployer}}</strong></div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-5 text-muted">Work Location</div>
+                    <div class="col-7"><strong>{{worker.workLocation}}</strong></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="#!/dashboard" class="btn btn-primary">← Back to Dashboard</a>
+        </div>
+    </div>
+</div>

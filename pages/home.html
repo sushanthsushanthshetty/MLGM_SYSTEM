@@ -1,0 +1,107 @@
+<!-- Home Page -->
+ <script>
+    // HomeController for the home page
+    app.controller('HomeController', ['$scope', function($scope) {
+        $scope.projectTitle = "Migrant Worker Grievance Redressal System";
+        $scope.description = "A secure platform for migrant workers to register complaints, access resources, and connect with verified employers.";
+    }]);
+</script>
+<div class="hero-section text-center">
+    <h1>{{projectTitle}}</h1>
+    <p>{{description}}</p>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card feature-card">
+            <div class="card-body">
+                <div class="card-icon">
+                    <span>🔐</span>
+                </div>
+                <h5 class="card-title">Already Registered?</h5>
+                <p class="card-text">Login to access your dashboard, view profile, and manage your complaints.</p>
+                <a href="#!/login" class="btn btn-primary">Login</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card feature-card">
+            <div class="card-body">
+                <div class="card-icon">
+                    <span>📝</span>
+                </div>
+                <h5 class="card-title">New User?</h5>
+                <p class="card-text">Register yourself to get a unique Migrant ID and access all services.</p>
+                <a href="#!/register" class="btn btn-success">Register</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Key Features</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex align-items-center">
+                            <span class="me-3" style="font-size: 2rem;">🆔</span>
+                            <div>
+                                <h6>Unique Migrant ID</h6>
+                                <small class="text-muted">Get a unique identification number</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex align-items-center">
+                            <span class="me-3" style="font-size: 2rem;">📋</span>
+                            <div>
+                                <h6>File Complaints</h6>
+                                <small class="text-muted">Register grievances easily</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex align-items-center">
+                            <span class="me-3" style="font-size: 2rem;">🏢</span>
+                            <div>
+                                <h6>Employer Directory</h6>
+                                <small class="text-muted">Browse verified employers</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex align-items-center">
+                            <span class="me-3" style="font-size: 2rem;">👤</span>
+                            <div>
+                                <h6>Profile Management</h6>
+                                <small class="text-muted">Update your details anytime</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex align-items-center">
+                            <span class="me-3" style="font-size: 2rem;">📊</span>
+                            <div>
+                                <h6>Track Complaints</h6>
+                                <small class="text-muted">Monitor complaint status</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex align-items-center">
+                            <span class="me-3" style="font-size: 2rem;">🔒</span>
+                            <div>
+                                <h6>Secure Portal</h6>
+                                <small class="text-muted">Government secured platform</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

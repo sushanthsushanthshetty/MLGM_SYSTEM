@@ -1,0 +1,86 @@
+<!-- Employers Page -->
+<h2 class="page-title">Employer Directory</h2>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Verified Employers</h5>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">Browse through the list of verified employers registered with the system. Contact details and ratings are provided for your reference.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 col-lg-4 mb-4" ng-repeat="employer in employers">
+        <div class="card employer-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="card-title mb-1">{{employer.name}}</h5>
+                        <small class="text-muted">{{employer.type}}</small>
+                    </div>
+                    <span class="{{getStatusClass(employer.status)}}">{{employer.status}}</span>
+                </div>
+                
+                <div class="mb-3">
+                    <span class="rating-stars">{{getStars(employer.rating)}}</span>
+                    <span class="ms-2">{{employer.rating}}/5</span>
+                </div>
+                
+                <div class="mb-2">
+                    <small class="text-muted">📍 Location:</small>
+                    <p class="mb-0">{{employer.location}}</p>
+                </div>
+                
+                <div class="mb-2">
+                    <small class="text-muted">👥 Workers Employed:</small>
+                    <p class="mb-0">{{employer.workers}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">Employer Statistics</h5>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-4 mb-3">
+                <h3 class="text-primary">{{employers.length}}</h3>
+                <p class="mb-0 text-muted">Total Employers</p>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h3 class="text-success">{{(employers | filter:{status:'Active'}).length}}</h3>
+                <p class="mb-0 text-muted">Active Employers</p>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h3 class="text-danger">{{(employers | filter:{status:'Inactive'}).length}}</h3>
+                <p class="mb-0 text-muted">Inactive Employers</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">Status Legend</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6 mb-2">
+                <span class="status-active">Active</span>
+                <small class="ms-2 text-muted">Currently hiring migrant workers</small>
+            </div>
+            <div class="col-md-6 mb-2">
+                <span class="status-inactive">Inactive</span>
+                <small class="ms-2 text-muted">Not currently hiring</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a href="#!/dashboard" class="btn btn-primary">← Back to Dashboard</a>
+</div>

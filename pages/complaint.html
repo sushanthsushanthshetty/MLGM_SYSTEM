@@ -1,0 +1,94 @@
+<!-- Complaint Page -->
+<h2 class="page-title">File a Complaint</h2>
+
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Complaint Registration Form</h5>
+            </div>
+            <div class="card-body">
+                <!-- Success Message -->
+                <div ng-show="submissionSuccess" class="alert alert-success text-center">
+                    <h5>✅ Complaint Submitted Successfully!</h5>
+                    <p class="mb-0">Your complaint has been registered. You will be notified about the status.</p>
+                </div>
+                
+                <!-- Complaint Form -->
+                <form ng-show="!submissionSuccess" name="complaintForm" ng-submit="submitComplaint()" novalidate>
+                    <div class="mb-3">
+                        <label class="form-label">Complaint Type</label>
+                        <select class="form-select" ng-model="complaintData.type" ng-options="type.value as type.label for type in complaintTypes" required>
+                            <option value="">Select Complaint Type</option>
+                        </select>
+                        <div class="text-danger small" ng-show="complaintForm.$submitted && !complaintData.type">
+                            Please select a complaint type
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" ng-model="complaintData.description" rows="5" placeholder="Describe your complaint in detail..." required></textarea>
+                        <div class="text-danger small" ng-show="complaintForm.$submitted && !complaintData.description">
+                            Please describe your complaint
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger" ng-disabled="complaintForm.$invalid">
+                            Submit Complaint
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- After Submission -->
+                <div ng-show="submissionSuccess" class="mt-4">
+                    <div class="card bg-light">
+                        <div class="card-header">
+                            <h6 class="mb-0">Complaint Details</h6>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-borderless mb-0">
+                                <tr>
+                                    <td><strong>Type:</strong></td>
+                                    <td>{{complaintData.type}}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Description:</strong></td>
+                                    <td>{{complaintData.description}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-3">
+                        <button class="btn btn-outline-danger" ng-click="resetForm()">
+                            File Another Complaint
+                        </button>
+                        <a href="#!/complaints" class="btn btn-primary">
+                            View My Complaints
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Important Information</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2">📌 Your complaint will be reviewed within 7 working days.</li>
+                    <li class="mb-2">📌 You will receive updates on your registered mobile number.</li>
+                    <li class="mb-2">📌 For urgent issues, contact the helpline: 1800-XXX-XXXX</li>
+                    <li class="mb-0">📌 All complaints are treated with confidentiality.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="#!/dashboard" class="btn btn-outline-primary">← Back to Dashboard</a>
+        </div>
+    </div>
+</div>
