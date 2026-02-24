@@ -1,0 +1,91 @@
+<!-- Admin Complaints Management Page -->
+<h2 class="page-title">Manage Complaints</h2>
+
+<!-- Loading indicator -->
+<div ng-show="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading complaints...</p>
+</div>
+
+<!-- Complaints Content -->
+<div ng-show="!loading">
+    <!-- Filter Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-4 mb-2 mb-md-0">
+                    <label class="form-label mb-0 me-2">Filter by Status:</label>
+                    <select class="form-select form-select-sm d-inline-block w-auto" ng-model="filterStatus" ng-change="loadComplaints()">
+                        <option value="">All</option>
+                        <option value="pending">Pending</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+                <div class="col-md-4 text-center">
+                    <span class="badge bg-primary fs-6">{{complaints.length}} Complaints</span>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="#!/admin-dashboard" class="btn btn-sm btn-outline-secondary">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Complaints List -->
+    <div class="card">
+        <div class="card-body">
+            <div ng-show="complaints.length === 0" class="text-center py-4">
+                <p class="text-muted">No complaints found.</p>
+            </div>
+            
+            <div class="table-responsive" ng-show="complaints.length > 0">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Complaint ID</th>
+                            <th>Worker</th>
+                            <th>Contact</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Employer</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="complaint in complaints">
+                            <td><strong>{{complaint.complaint_id}}</strong></td>
+                            <td>
+                                {{complaint.worker_name}}<br>
+                                <small class="text-muted">{{complaint.migrant_id}}</small>
+                            </td>
+                            <td>{{complaint.phone}}</td>
+                            <td>{{complaint.category}}</td>
+                            <td>{{complaint.description | limitTo:50}}{{complaint.description.length > 50 ? '...' : ''}}</td>
+                            <td>{{complaint.employer_name || 'N/A'}}</td>
+                            <td>{{complaint.created_at | date:'dd MMM yyyy'}}</td>
+                            <td><span class="status-{{complaint.status}}">{{complaint.status | capitalize}}</span></td>
+                            <td>
+                                <div ng-show="complaint.status === 'pending' || complaint.status === 'in_progress'">
+                                    <button class="btn btn-sm btn-success me-1" ng-click="resolveComplaint(complaint)" ng-disabled="complaint.processing">
+                                        Resolve
+                                    </button>
+                                </div>
+                                <span ng-show="complaint.status === 'resolved'" class="text-muted">Done</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a href="#!/admin-dashboard" class="btn btn-primary">Back to Dashboard</a>
+</div>

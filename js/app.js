@@ -66,6 +66,10 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'pages/admin-applications.html',
             controller: 'AdminApplicationsController'
         })
+        .when('/admin-complaints', {
+            templateUrl: 'pages/admin-complaints.html',
+            controller: 'AdminComplaintsController'
+        })
         .otherwise({
             redirectTo: '/'
         });

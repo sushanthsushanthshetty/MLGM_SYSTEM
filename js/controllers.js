@@ -153,7 +153,13 @@ app.controller('RegisterController', ['$scope', '$http', '$location', function($
                 }
             })
             .catch(function(error) {
-                $scope.errorMessage = error.data?.message || 'An error occurred. Please try again.';
+                console.error('Complaint error:', error);
+                if (error.status === 401) {
+                    $scope.errorMessage = 'Please login again to submit a complaint.';
+                    $location.path('/login');
+                } else {
+                    $scope.errorMessage = error.data?.message || 'An error occurred. Please try again.';
+                }
             })
             .finally(function() {
                 $scope.loading = false;
@@ -434,6 +440,17 @@ app.controller('ComplaintController', ['$scope', '$http', '$location', 'AuthServ
             return;
         }
         
+        // Client-side validation
+        if (!$scope.complaintData.type) {
+            $scope.errorMessage = 'Please select a complaint type.';
+            return;
+        }
+        
+        if (!$scope.complaintData.description || $scope.complaintData.description.length < 10) {
+            $scope.errorMessage = 'Description must be at least 10 characters.';
+            return;
+        }
+        
         $scope.loading = true;
         $scope.errorMessage = '';
         
@@ -441,6 +458,8 @@ app.controller('ComplaintController', ['$scope', '$http', '$location', 'AuthServ
             type: $scope.complaintData.type,
             description: $scope.complaintData.description
         };
+        
+        console.log('Submitting complaint:', requestData);
         
         $http.post(API_BASE_URL + '/complaint/add', requestData)
             .then(function(response) {
@@ -928,4 +947,61 @@ app.controller('AdminApplicationsController', ['$scope', '$http', '$location', '
     
     // Initial load
     $scope.loadApplications();
+}]);
+
+// =====================================================
+// Admin Complaints Controller
+// =====================================================
+app.controller('AdminComplaintsController', ['$scope', '$http', '$location', '$window', function($scope, $http, $location, $window) {
+    // Check if admin is logged in
+    var admin = $window.localStorage.getItem('mlgms_admin');
+    if (!admin) {
+        $location.path('/admin-login');
+        return;
+    }
+    
+    $scope.complaints = [];
+    $scope.filterStatus = 'pending';
+    $scope.loading = true;
+    
+    // Load complaints
+    $scope.loadComplaints = function() {
+        $scope.loading = true;
+        var url = API_BASE_URL + '/admin/complaints';
+        if ($scope.filterStatus) {
+            url += '?status=' + $scope.filterStatus;
+        }
+        
+        $http.get(url)
+            .then(function(response) {
+                if (response.data.success) {
+                    $scope.complaints = response.data.complaints;
+                }
+            })
+            .catch(function(error) {
+                console.error('Error loading complaints:', error);
+            })
+            .finally(function() {
+                $scope.loading = false;
+            });
+    };
+    
+    // Resolve complaint
+    $scope.resolveComplaint = function(complaint) {
+        complaint.processing = true;
+        $http.post(API_BASE_URL + '/admin/complaints/' + complaint.id + '/resolve')
+            .then(function(response) {
+                if (response.data.success) {
+                    complaint.status = 'resolved';
+                    complaint.processing = false;
+                }
+            })
+            .catch(function(error) {
+                alert('Error resolving complaint');
+                complaint.processing = false;
+            });
+    };
+    
+    // Initial load
+    $scope.loadComplaints();
 }]);
