@@ -1,0 +1,22 @@
+# =====================================================
+# Migrant Labor & Grievance Management System (MLGMS)
+# Python Dependencies
+# =====================================================
+
+# Flask Framework
+Flask==3.0.0
+
+# Database - PyMySQL (pure Python, no compilation needed)
+PyMySQL==1.1.0
+
+# CORS Support
+Flask-CORS==4.0.0
+
+# Security
+Werkzeug==3.0.1
+
+# Session Management
+Flask-Session==0.5.0
+
+# Development
+python-dotenv==1.0.0

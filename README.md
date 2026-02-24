@@ -1,267 +1,328 @@
 # Migrant Labor & Grievance Management System (MLGMS)
 
-## 🌟 Overview
+A comprehensive government portal for migrant workers to register, manage profiles, file complaints, and connect with employers.
 
-The **Migrant Labor & Grievance Management System (MLGMS)** is a comprehensive government portal designed to protect the rights of migrant workers, facilitate their registration, manage their profiles, file and track grievances, and connect them with verified employers. This system aims to bring transparency, accountability, and efficiency to the migrant labor ecosystem.
-
----
-
-## 🔴 Real-World Problem Statement
-
-### The Migrant Labor Crisis
-
-Migrant workers are among the most vulnerable populations in any country. They face numerous challenges:
-
-#### 1. **Lack of Legal Identity & Documentation**
-- Many migrant workers lack proper registration with local authorities
-- No centralized database exists to track their employment history
-- Absence of legal documentation makes them invisible to the system
-
-#### 2. **Exploitation & Abuse**
-- **Wage Theft**: Employers often withhold wages or pay below minimum wage
-- **Excessive Working Hours**: Workers are forced to work overtime without compensation
-- **Unsafe Working Conditions**: Lack of safety equipment and protocols
-- **Contract Violations**: Terms of employment are frequently violated
-
-#### 3. **No Grievance Redressal Mechanism**
-- Workers have no formal channel to report abuses
-- Fear of retaliation prevents complaints
-- No tracking system for complaint status
-- Bureaucratic hurdles discourage reporting
-
-#### 4. **Information Asymmetry**
-- Workers don't know their rights
-- No access to verified employer information
-- Lack of awareness about available government schemes
-
-#### 5. **Humanitarian Crisis During Emergencies**
-- The COVID-19 pandemic exposed the plight of migrant workers
-- Millions were stranded without support, money, or food
-- No system to identify and reach affected workers
-
-### How MLGMS Solves These Problems
-
-| Problem | MLGMS Solution |
-|---------|----------------|
-| No legal identity | Unique Migrant ID upon registration |
-| Wage theft & exploitation | Formal complaint filing with tracking |
-| No grievance mechanism | Multi-category complaint system with status updates |
-| Information asymmetry | Verified employer database with ratings |
-| Lack of support | Centralized dashboard for all services |
-
----
-
-## ✨ Features
-
-### 1. **Worker Registration**
-- Simple registration form capturing essential details
-- Unique Migrant ID generation
-- Skill categorization for better job matching
-- Mobile number verification
-
-### 2. **Profile Management**
-- View and update personal information
-- Track employment history
-- View registration status
-- Access to important documents
-
-### 3. **Grievance Filing System**
-- Multiple complaint categories:
-  - Non-Payment of Wages
-  - Safety Issues
-  - Workplace Harassment
-  - Accommodation Problems
-  - Excessive Working Hours
-  - Contract Violation
-- Real-time complaint tracking
-- Status updates via SMS
-
-### 4. **Complaint Tracking Dashboard**
-- View all filed complaints
-- Track status (Pending/Resolved)
-- Historical complaint records
-- Response timeline
-
-### 5. **Employer Directory**
-- Database of verified employers
-- Employer ratings and reviews
-- Worker count and industry type
-- Active/Inactive status indicators
-
-### 6. **User Dashboard**
-- Centralized access to all services
-- Quick navigation to important features
-- Profile overview
-- Recent activity summary
-
----
-
-## 🛠️ Technology Stack
-
-| Category | Technology |
-|----------|------------|
-| **Frontend Framework** | AngularJS 1.8.2 |
-| **Routing** | Angular Route (ngRoute) |
-| **UI Framework** | Bootstrap 5.3.2 |
-| **Styling** | Custom CSS |
-| **Architecture** | Single Page Application (SPA) |
-
----
-
-## 📁 Project Structure
+## 🏗️ Project Structure
 
 ```
 MLGM_SYSTEM/
-├── index.html              # Main entry point (SPA shell)
-├── README.md               # Project documentation
+├── index.html                 # Main HTML file
 ├── css/
-│   └── style.css           # Custom styles
+│   └── style.css             # Custom styles
 ├── js/
-│   ├── app.js              # AngularJS module & route configuration
-│   └── controllers.js      # Application controllers
-└── pages/
-    ├── home.html           # Landing page
-    ├── register.html       # Worker registration form
-    ├── login.html          # Login page
-    ├── dashboard.html      # User dashboard
-    ├── profile.html        # Profile management
-    ├── complaint.html      # File new complaint
-    ├── complaints.html     # View complaints list
-    └── employers.html      # Employer directory
+│   ├── app.js                # AngularJS app configuration
+│   └── controllers.js        # AngularJS controllers (connected to Flask API)
+├── pages/
+│   ├── home.html             # Home page
+│   ├── register.html         # Worker registration
+│   ├── login.html            # Worker login
+│   ├── dashboard.html        # Worker dashboard
+│   ├── profile.html          # Profile view/edit
+│   ├── complaint.html        # File complaint
+│   ├── complaints.html       # View complaints list
+│   └── employers.html        # Employer directory
+├── backend/
+│   ├── __init__.py           # Backend package init
+│   ├── app.py                # Flask main application
+│   ├── config.py             # Configuration settings
+│   ├── models.py             # Database models
+│   └── routes/
+│       ├── __init__.py       # Routes package init
+│       ├── auth_routes.py    # Authentication routes
+│       ├── worker_routes.py  # Worker profile routes
+│       ├── complaint_routes.py # Complaint routes
+│       ├── employer_routes.py  # Employer routes
+│       └── dashboard_routes.py # Dashboard routes
+├── database/
+│   └── mlgms_db.sql          # MySQL database schema
+├── requirements.txt          # Python dependencies
+└── README.md                 # This file
 ```
 
----
+## 🛠️ Technology Stack
+
+### Frontend
+- AngularJS 1.8.2
+- HTML5, CSS3
+- Bootstrap 5.3.2
+- ngRoute for routing
+
+### Backend
+- Python Flask
+- Flask-MySQLdb
+- Flask-CORS
+- Werkzeug (password hashing)
+
+### Database
+- MySQL (XAMPP phpMyAdmin)
+
+## 📋 Prerequisites
+
+1. **XAMPP** - For MySQL database
+   - Download from: https://www.apachefriends.org/
+   - Install and start Apache & MySQL
+
+2. **Python 3.8+**
+   - Download from: https://www.python.org/downloads/
+
+3. **pip** (comes with Python)
 
 ## 🚀 Installation & Setup
 
-### Prerequisites
-- A modern web browser (Chrome, Firefox, Edge, Safari)
-- Python 3.x (for local development server) OR Node.js
-
-### Option 1: Python HTTP Server
+### Step 1: Clone/Download the Project
 
 ```bash
-# Navigate to project directory
 cd c:\MLGM_SYSTEM
-
-# Start local server
-python -m http.server 8000
-
-# Open in browser
-# http://localhost:8000
 ```
 
-### Option 2: Node.js HTTP Server
+### Step 2: Setup MySQL Database
+
+1. Start XAMPP Control Panel
+2. Start Apache and MySQL services
+3. Open phpMyAdmin: http://localhost/phpmyadmin
+4. Go to "SQL" tab
+5. Copy and paste the contents of `database/mlgms_db.sql`
+6. Click "Go" to execute
+
+**Or use MySQL command line:**
+```bash
+mysql -u root < database/mlgms_db.sql
+```
+
+### Step 3: Install Python Dependencies
 
 ```bash
-# Navigate to project directory
-cd c:\MLGM_SYSTEM
-
-# Start server using npx
-npx http-server -p 8000
-
-# Open in browser
-# http://localhost:8000
+pip install -r requirements.txt
 ```
 
-### Option 3: VS Code Live Server
+If you encounter issues with mysqlclient, try:
+```bash
+pip install mysqlclient
+# If that fails, try:
+pip install pymysql
+```
 
-1. Install "Live Server" extension in VS Code
-2. Right-click `index.html`
-3. Select "Open with Live Server"
+### Step 4: Configure Database Connection
 
----
+Edit `backend/config.py` if your MySQL credentials are different:
 
-## 📱 Application Routes
+```python
+MYSQL_HOST = 'localhost'
+MYSQL_USER = 'root'
+MYSQL_PASSWORD = ''  # Default XAMPP has no password
+MYSQL_DB = 'mlgms_db'
+```
 
-| Route | Page | Description |
-|-------|------|-------------|
-| `#!/` | Home | Landing page with system overview |
-| `#!/register` | Register | New worker registration |
-| `#!/login` | Login | Worker login portal |
-| `#!/dashboard` | Dashboard | User control panel |
-| `#!/profile` | Profile | View/edit profile details |
-| `#!/complaint` | File Complaint | Submit new grievance |
-| `#!/complaints` | My Complaints | View complaint history |
-| `#!/employers` | Employers | Browse verified employers |
+### Step 5: Run the Flask Backend
 
----
+```bash
+cd backend
+python app.py
+```
 
-## 🎯 Target Users
+You should see:
+```
+============================================================
+Migrant Labor & Grievance Management System (MLGMS)
+============================================================
+Environment: development
+Server running on: http://localhost:5000
+API Base URL: http://localhost:5000/api
+============================================================
+```
 
-1. **Migrant Workers**
-   - Register themselves in the system
-   - File and track complaints
-   - Access verified employer information
+### Step 6: Access the Application
 
-2. **Government Officials**
-   - Monitor worker registrations
-   - Process and resolve complaints
-   - Maintain employer database
+Open your browser and go to:
+```
+http://localhost:5000
+```
 
-3. **Employers**
-   - Register their organizations
-   - Access skilled worker database
-   - Maintain compliance records
+Or open `index.html` directly in a browser (requires Flask running for API calls).
 
-4. **Labor Department**
-   - Generate reports and analytics
-   - Track grievance resolution
-   - Policy decision support
+## 📡 API Endpoints
 
----
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/register` | Register new worker |
+| POST | `/api/login` | Worker login |
+| POST | `/api/logout` | Worker logout |
+| GET | `/api/check-session` | Check session validity |
 
-## 🔮 Future Enhancements
+### Worker Profile
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/profile` | Get current worker profile |
+| GET | `/api/profile/<worker_id>` | Get worker by ID |
+| PUT | `/api/profile/update` | Update profile |
 
-### Phase 2 Features
-- [ ] Backend API integration (Node.js/Express or Python/Django)
-- [ ] Database integration (MongoDB/PostgreSQL)
-- [ ] SMS/Email notifications
-- [ ] Multi-language support (Hindi, Tamil, Bengali, etc.)
-- [ ] Mobile responsive improvements
-- [ ] Biometric authentication
+### Complaints
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/complaint/add` | Submit new complaint |
+| GET | `/api/complaint/list` | Get worker's complaints |
+| GET | `/api/complaint/<worker_id>` | Get complaints by worker ID |
+| PUT | `/api/complaint/update_status` | Update complaint status |
 
-### Phase 3 Features
-- [ ] Mobile application (React Native/Flutter)
-- [ ] Integration with Aadhaar (Indian national ID)
-- [ ] AI-powered complaint categorization
-- [ ] Blockchain-based document verification
-- [ ] Real-time chat support
-- [ ] Integration with other government portals
+### Employers
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/employers/list` | Get all employers |
+| GET | `/api/employers/<id>` | Get employer by ID |
+| GET | `/api/employers/stats` | Get employer statistics |
 
----
+### Dashboard
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/dashboard/current` | Get current worker dashboard |
+| GET | `/api/dashboard/<worker_id>` | Get worker dashboard by ID |
 
-## 🤝 Contributing
+## 🔐 Authentication Flow
 
-Contributions are welcome! Please follow these steps:
+1. **Register**: User fills registration form → Gets unique Migrant ID (e.g., MIG00001)
+2. **Login**: Enter Migrant ID + Mobile Number → Session created
+3. **Session**: Stored in localStorage and database
+4. **Protected Routes**: Require valid session token in Authorization header
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+## 📝 Usage Guide
 
----
+### Worker Registration
+1. Click "Register" on home page
+2. Fill in details (Name, Mobile, Age, Gender, Skill)
+3. Submit form
+4. **Note your Migrant ID** (e.g., MIG00001) - This is your login credential!
 
-## 📄 License
+### Worker Login
+1. Click "Login" on home page
+2. Enter your Migrant ID (e.g., MIG00001)
+3. Enter your registered mobile number
+4. Click Login
 
-This project is developed for government use and is licensed under the MIT License - see the LICENSE file for details.
+### File a Complaint
+1. Login and go to Dashboard
+2. Click "File Complaint"
+3. Select complaint type
+4. Describe your issue
+5. Submit
 
----
+### View Profile
+1. Login and go to Dashboard
+2. Click "My Profile"
+3. View/Edit your details
+
+## 🔧 Troubleshooting
+
+### Database Connection Error
+```
+Error: Can't connect to MySQL server
+```
+**Solution:**
+- Ensure MySQL is running in XAMPP
+- Check credentials in `backend/config.py`
+
+### CORS Error
+```
+Access-Control-Allow-Origin error
+```
+**Solution:**
+- Flask-CORS is configured, but ensure Flask server is running
+- Access app via `http://localhost:5000` not `file://`
+
+### Module Not Found
+```
+ModuleNotFoundError: No module named 'flask'
+```
+**Solution:**
+```bash
+pip install -r requirements.txt
+```
+
+### mysqlclient Installation Error (Windows)
+```bash
+# Try alternative:
+pip install pymysql
+
+# Then add to backend/models.py:
+import pymysql
+pymysql.install_as_MySQLdb()
+```
+
+## 🧪 Testing the API
+
+### Test Registration
+```bash
+curl -X POST http://localhost:5000/api/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test User","phone":"9876543210","age":30,"gender":"male","skill":"electrician"}'
+```
+
+### Test Login
+```bash
+curl -X POST http://localhost:5000/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"migrant_id":"MIG00001","phone":"9876543210"}'
+```
+
+### Test Health Check
+```bash
+curl http://localhost:5000/api/health
+```
+
+## 📊 Database Schema
+
+### workers table
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INT | Primary Key |
+| migrant_id | VARCHAR(20) | Unique ID (MIG00001) |
+| name | VARCHAR(100) | Worker name |
+| phone | VARCHAR(15) | Mobile number |
+| password | VARCHAR(255) | Hashed password |
+| skill | VARCHAR(50) | Primary skill |
+| age | INT | Age |
+| gender | ENUM | male/female/other |
+| status | ENUM | active/inactive |
+
+### complaints table
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INT | Primary Key |
+| complaint_id | VARCHAR(20) | Unique ID (CMP00001) |
+| worker_id | INT | Foreign Key |
+| category | VARCHAR(50) | Complaint type |
+| description | TEXT | Issue details |
+| status | ENUM | pending/resolved |
+
+### employers table
+| Column | Type | Description |
+|--------|------|-------------|
+| id | INT | Primary Key |
+| company_name | VARCHAR(150) | Company name |
+| industry | VARCHAR(100) | Industry type |
+| location | VARCHAR(200) | Location |
+| rating | DECIMAL(3,2) | Rating (0-5) |
+| status | ENUM | active/inactive |
+
+## 🔒 Security Features
+
+- Password hashing with Werkzeug (pbkdf2:sha256)
+- Session-based authentication
+- CORS protection
+- Input validation
+- SQL injection prevention (parameterized queries)
 
 ## 📞 Support
 
-For support or queries:
-- **Helpline**: 1800-XXX-XXXX (Toll Free)
-- **Email**: support@mlgms.gov.in
-- **Working Hours**: Monday to Saturday, 9:00 AM - 6:00 PM
+For issues or questions:
+1. Check the Troubleshooting section
+2. Verify database connection
+3. Check Flask console for errors
+
+## 📄 License
+
+Government Portal - Migrant Labor & Grievance Management System
 
 ---
 
-## 👨‍💻 Author
-
-**Government Portal Development Team**
-
----
-
-> *"Empowering Migrant Workers, Ensuring Dignity and Justice"*
+**Developed for the welfare of migrant workers**

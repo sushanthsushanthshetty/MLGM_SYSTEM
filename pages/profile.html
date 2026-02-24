@@ -1,8 +1,29 @@
 <!-- Profile Page -->
 <h2 class="page-title">My Profile</h2>
 
-<div class="row">
+<!-- Loading indicator -->
+<div ng-show="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading profile...</p>
+</div>
+
+<!-- Profile Content -->
+<div ng-show="!loading && worker" class="row">
     <div class="col-lg-6 mx-auto">
+        <!-- Success Message -->
+        <div ng-show="updateSuccess" class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>Success!</strong> Profile updated successfully.
+            <button type="button" class="btn-close" ng-click="updateSuccess = false"></button>
+        </div>
+        
+        <!-- Error Message -->
+        <div ng-show="updateError" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error!</strong> {{updateError}}
+            <button type="button" class="btn-close" ng-click="updateError = ''"></button>
+        </div>
+        
         <div class="card profile-card">
             <div class="card-body text-center">
                 <div class="mb-3">
@@ -11,14 +32,18 @@
                     </div>
                 </div>
                 <h3>{{worker.name}}</h3>
-                <p class="mb-1">Migrant ID: {{worker.migrantId}}</p>
+                <p class="mb-1">Migrant ID: {{worker.migrant_id}}</p>
                 <span class="status-active">{{worker.status}}</span>
             </div>
         </div>
         
-        <div class="card mt-4">
-            <div class="card-header">
+        <!-- View Mode -->
+        <div ng-show="!editMode" class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Personal Information</h5>
+                <button class="btn btn-sm btn-primary" ng-click="enableEdit()">
+                    ✏️ Edit Profile
+                </button>
             </div>
             <div class="card-body">
                 <div class="row mb-3 pb-3 border-bottom">
@@ -27,7 +52,7 @@
                 </div>
                 <div class="row mb-3 pb-3 border-bottom">
                     <div class="col-5 text-muted">Migrant ID</div>
-                    <div class="col-7"><strong>{{worker.migrantId}}</strong></div>
+                    <div class="col-7"><strong>{{worker.migrant_id}}</strong></div>
                 </div>
                 <div class="row mb-3 pb-3 border-bottom">
                     <div class="col-5 text-muted">Skill</div>
@@ -35,7 +60,7 @@
                 </div>
                 <div class="row mb-3 pb-3 border-bottom">
                     <div class="col-5 text-muted">Mobile Number</div>
-                    <div class="col-7"><strong>{{worker.mobile}}</strong></div>
+                    <div class="col-7"><strong>{{worker.phone}}</strong></div>
                 </div>
                 <div class="row mb-3 pb-3 border-bottom">
                     <div class="col-5 text-muted">Age</div>
@@ -43,31 +68,100 @@
                 </div>
                 <div class="row mb-3 pb-3 border-bottom">
                     <div class="col-5 text-muted">Gender</div>
-                    <div class="col-7"><strong>{{worker.gender}}</strong></div>
+                    <div class="col-7"><strong>{{worker.gender | capitalize}}</strong></div>
                 </div>
-                <div class="row mb-3 pb-3 border-bottom">
+                <div class="row mb-3 pb-3 border-bottom" ng-if="worker.state">
+                    <div class="col-5 text-muted">State</div>
+                    <div class="col-7"><strong>{{worker.state}}</strong></div>
+                </div>
+                <div class="row mb-3 pb-3 border-bottom" ng-if="worker.district">
+                    <div class="col-5 text-muted">District</div>
+                    <div class="col-7"><strong>{{worker.district}}</strong></div>
+                </div>
+                <div class="row mb-3 pb-3 border-bottom" ng-if="worker.address">
                     <div class="col-5 text-muted">Address</div>
                     <div class="col-7"><strong>{{worker.address}}</strong></div>
                 </div>
                 <div class="row mb-3 pb-3 border-bottom">
                     <div class="col-5 text-muted">Registration Date</div>
-                    <div class="col-7"><strong>{{worker.registrationDate}}</strong></div>
+                    <div class="col-7"><strong>{{worker.registration_date}}</strong></div>
                 </div>
             </div>
         </div>
         
-        <div class="card mt-4">
+        <!-- Edit Mode -->
+        <div ng-show="editMode" class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Edit Profile</h5>
+            </div>
+            <div class="card-body">
+                <form name="editForm" ng-submit="updateProfile()">
+                    <div class="mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" ng-model="editData.name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Mobile Number</label>
+                        <input type="tel" class="form-control" ng-model="editData.phone" ng-pattern="/^[0-9]{10}$/" required>
+                        <div class="text-danger small" ng-show="editForm.phone.$error.pattern">
+                            Please enter a valid 10-digit mobile number
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Age</label>
+                        <input type="number" class="form-control" ng-model="editData.age" min="18" max="65">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Gender</label>
+                        <select class="form-select" ng-model="editData.gender">
+                            <option value="">Select Gender</option>
+                            <option ng-repeat="gender in genderOptions" value="{{gender.value}}">{{gender.label}}</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Skill</label>
+                        <input type="text" class="form-control" ng-model="editData.skill">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">State</label>
+                        <input type="text" class="form-control" ng-model="editData.state">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">District</label>
+                        <input type="text" class="form-control" ng-model="editData.district">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Address</label>
+                        <textarea class="form-control" ng-model="editData.address" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="button" class="btn btn-secondary" ng-click="cancelEdit()">Cancel</button>
+                        <button type="submit" class="btn btn-primary" ng-disabled="editForm.$invalid">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4" ng-if="worker.current_employer">
             <div class="card-header">
                 <h5 class="mb-0">Employment Information</h5>
             </div>
             <div class="card-body">
                 <div class="row mb-3 pb-3 border-bottom">
                     <div class="col-5 text-muted">Current Employer</div>
-                    <div class="col-7"><strong>{{worker.currentEmployer}}</strong></div>
+                    <div class="col-7"><strong>{{worker.current_employer}}</strong></div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-5 text-muted">Work Location</div>
-                    <div class="col-7"><strong>{{worker.workLocation}}</strong></div>
+                    <div class="col-7"><strong>{{worker.work_location}}</strong></div>
                 </div>
             </div>
         </div>

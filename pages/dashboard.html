@@ -1,68 +1,96 @@
 <!-- Dashboard Page -->
-
-<!-- AngularJS -->
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
-
-<!-- Angular Route -->
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
 <h2 class="page-title">Worker Dashboard</h2>
 
-<div class="row">
-    <div class="col-md-4 col-sm-6 mb-4" ng-repeat="item in menuItems">
-        <div class="card dashboard-card" ng-click="navigateTo(item.link)" style="border-left: 4px solid {{item.color}};">
-            <div class="card-body">
-                <div class="card-icon" style="background-color: {{item.color}};">
-                    <span>{{item.icon}}</span>
-                </div>
-                <h5 class="card-title">{{item.title}}</h5>
-            </div>
-        </div>
+<!-- Loading indicator -->
+<div ng-show="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
     </div>
+    <p class="mt-2">Loading dashboard...</p>
 </div>
 
-<div class="card mt-4">
-    <div class="card-header">
-        <h5 class="mb-0">Quick Information</h5>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-4 mb-3">
-                <div class="d-flex align-items-center">
-                    <div class="me-3 p-3 bg-primary text-white rounded">
-                        <span style="font-size: 1.5rem;">📋</span>
+<!-- Dashboard Content -->
+<div ng-show="!loading">
+    <div class="row">
+        <div class="col-md-4 col-sm-6 mb-4" ng-repeat="item in menuItems">
+            <div class="card dashboard-card" ng-click="navigateTo(item.link)" style="border-left: 4px solid {{item.color}};">
+                <div class="card-body">
+                    <div class="card-icon" style="background-color: {{item.color}};">
+                        <span>{{item.icon}}</span>
                     </div>
-                    <div>
-                        <h6 class="mb-0">Total Complaints</h6>
-                        <h4 class="mb-0 text-primary">5</h4>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="d-flex align-items-center">
-                    <div class="me-3 p-3 bg-warning text-dark rounded">
-                        <span style="font-size: 1.5rem;">⏳</span>
-                    </div>
-                    <div>
-                        <h6 class="mb-0">Pending</h6>
-                        <h4 class="mb-0 text-warning">3</h4>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-3">
-                <div class="d-flex align-items-center">
-                    <div class="me-3 p-3 bg-success text-white rounded">
-                        <span style="font-size: 1.5rem;">✅</span>
-                    </div>
-                    <div>
-                        <h6 class="mb-0">Resolved</h6>
-                        <h4 class="mb-0 text-success">2</h4>
-                    </div>
+                    <h5 class="card-title">{{item.title}}</h5>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="text-center mt-4">
-    <p class="text-muted">Welcome to Migrant Labor & Grievance Management System</p>
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Quick Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3 p-3 bg-primary text-white rounded">
+                            <span style="font-size: 1.5rem;">📋</span>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Total Complaints</h6>
+                            <h4 class="mb-0 text-primary">{{stats.total}}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3 p-3 bg-warning text-dark rounded">
+                            <span style="font-size: 1.5rem;">⏳</span>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Pending</h6>
+                            <h4 class="mb-0 text-warning">{{stats.pending}}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3 p-3 bg-success text-white rounded">
+                            <span style="font-size: 1.5rem;">✅</span>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Resolved</h6>
+                            <h4 class="mb-0 text-success">{{stats.resolved}}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Welcome, {{worker.name}}!</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Migrant ID:</strong> {{worker.migrant_id}}</p>
+                    <p><strong>Skill:</strong> {{worker.skill}}</p>
+                    <p><strong>Status:</strong> <span class="status-active">{{worker.status}}</span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Phone:</strong> {{worker.phone}}</p>
+                    <p ng-if="worker.current_employer"><strong>Current Employer:</strong> {{worker.current_employer}}</p>
+                    <p ng-if="worker.work_location"><strong>Work Location:</strong> {{worker.work_location}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <p class="text-muted">Welcome to Migrant Labor & Grievance Management System</p>
+        <button class="btn btn-outline-danger" ng-click="logout()">
+            <span>🚪</span> Logout
+        </button>
+    </div>
 </div>
