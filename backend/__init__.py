@@ -16,4 +16,5 @@ __all__ = [
     'Session',
     'Admin',
     'config'
+    'config'
 ]

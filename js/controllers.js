@@ -1005,3 +1005,412 @@ app.controller('AdminComplaintsController', ['$scope', '$http', '$location', '$w
     // Initial load
     $scope.loadComplaints();
 }]);
+
+
+// =====================================================
+// Employer Register Controller
+// =====================================================
+app.controller('EmployerRegisterController', ['$scope', '$http', '$location', function($scope, $http, $location) {
+    // Initialize form data
+    $scope.formData = {
+        company_name: '',
+        industry: '',
+        location: '',
+        contact_person: '',
+        phone: '',
+        email: '',
+        password: '',
+        confirm_password: '',
+        gst_number: '',
+        registration_number: '',
+        address: ''
+    };
+    
+    $scope.registrationSuccess = false;
+    $scope.employerId = '';
+    $scope.loading = false;
+    $scope.errorMessage = '';
+    
+    // Register function
+    $scope.register = function() {
+        if ($scope.registerForm.$invalid) {
+            $scope.registerForm.$setSubmitted();
+            return;
+        }
+        
+        // Check password match
+        if ($scope.formData.password !== $scope.formData.confirm_password) {
+            $scope.errorMessage = 'Passwords do not match';
+            return;
+        }
+        
+        $scope.loading = true;
+        $scope.errorMessage = '';
+        
+        $http.post(API_BASE_URL + '/employers/register', $scope.formData)
+            .then(function(response) {
+                if (response.data.success) {
+                    $scope.registrationSuccess = true;
+                    $scope.employerId = response.data.employer_id;
+                } else {
+                    $scope.errorMessage = response.data.message || 'Registration failed. Please try again.';
+                }
+            })
+            .catch(function(error) {
+                $scope.errorMessage = error.data?.message || 'An error occurred. Please try again.';
+            })
+            .finally(function() {
+                $scope.loading = false;
+            });
+    };
+    
+    // Go to login
+    $scope.goToLogin = function() {
+        $location.path('/employer-login');
+    };
+}]);
+
+
+// =====================================================
+// Employer Login Controller
+// =====================================================
+app.controller('EmployerLoginController', ['$scope', '$http', '$location', '$window', function($scope, $http, $location, $window) {
+    // Initialize login data
+    $scope.loginData = {
+        employer_id: '',
+        password: ''
+    };
+    
+    $scope.loading = false;
+    $scope.errorMessage = '';
+    $scope.pendingVerification = false;
+    $scope.rejectedAccount = false;
+    
+    // Login function
+    $scope.login = function() {
+        if ($scope.loginForm.$invalid) {
+            return;
+        }
+        
+        $scope.loading = true;
+        $scope.errorMessage = '';
+        $scope.pendingVerification = false;
+        $scope.rejectedAccount = false;
+        
+        $http.post(API_BASE_URL + '/employers/login', {
+            employer_id: $scope.loginData.employer_id.toUpperCase(),
+            password: $scope.loginData.password
+        })
+            .then(function(response) {
+                if (response.data.success) {
+                    $window.localStorage.setItem('mlgms_employer', JSON.stringify(response.data.employer));
+                    $location.path('/employer-dashboard');
+                } else {
+                    $scope.errorMessage = response.data.message || 'Login failed.';
+                }
+            })
+            .catch(function(error) {
+                if (error.status === 403) {
+                    // Check verification status
+                    if (error.data.verification_status === 'pending') {
+                        $scope.pendingVerification = true;
+                        $scope.employerId = $scope.loginData.employer_id.toUpperCase();
+                    } else if (error.data.verification_status === 'rejected') {
+                        $scope.rejectedAccount = true;
+                        $scope.employerId = $scope.loginData.employer_id.toUpperCase();
+                    } else {
+                        $scope.errorMessage = error.data.message;
+                    }
+                } else {
+                    $scope.errorMessage = error.data?.message || 'Invalid credentials.';
+                }
+            })
+            .finally(function() {
+                $scope.loading = false;
+            });
+    };
+    
+    // Check again
+    $scope.checkAgain = function() {
+        $scope.pendingVerification = false;
+        $scope.login();
+    };
+}]);
+
+
+// =====================================================
+// Employer Dashboard Controller
+// =====================================================
+app.controller('EmployerDashboardController', ['$scope', '$http', '$location', '$window', function($scope, $http, $location, $window) {
+    // Check if employer is logged in
+    var employerSession = $window.localStorage.getItem('mlgms_employer');
+    if (!employerSession) {
+        $location.path('/employer-login');
+        return;
+    }
+    
+    $scope.employer = JSON.parse(employerSession);
+    $scope.job_stats = {};
+    $scope.application_stats = {};
+    $scope.recentApplications = [];
+    $scope.loading = true;
+    $scope.showPostJob = false;
+    $scope.jobData = {};
+    $scope.postingJob = false;
+    $scope.jobError = '';
+    $scope.jobSuccess = '';
+    
+    // Load dashboard data
+    $http.get(API_BASE_URL + '/employers/dashboard')
+        .then(function(response) {
+            if (response.data.success) {
+                $scope.employer = response.data.employer;
+                $scope.job_stats = response.data.job_stats;
+                $scope.application_stats = response.data.application_stats;
+                $scope.recentApplications = response.data.recent_applications;
+            }
+        })
+        .catch(function(error) {
+            console.error('Error loading dashboard:', error);
+            if (error.status === 401 || error.status === 403) {
+                $window.localStorage.removeItem('mlgms_employer');
+                $location.path('/employer-login');
+            }
+        })
+        .finally(function() {
+            $scope.loading = false;
+        });
+    
+    // Navigate to page
+    $scope.navigateTo = function(path) {
+        $location.path('/' + path);
+    };
+    
+    // Logout
+    $scope.logout = function() {
+        $http.post(API_BASE_URL + '/employers/logout')
+            .then(function() {
+                $window.localStorage.removeItem('mlgms_employer');
+                $location.path('/');
+            })
+            .catch(function() {
+                $window.localStorage.removeItem('mlgms_employer');
+                $location.path('/');
+            });
+    };
+    
+    // Post job
+    $scope.postJob = function() {
+        $scope.jobError = '';
+        $scope.jobSuccess = '';
+        
+        if ($scope.jobForm.$invalid) {
+            return;
+        }
+        
+        $scope.postingJob = true;
+        
+        $http.post(API_BASE_URL + '/employers/jobs', $scope.jobData)
+            .then(function(response) {
+                if (response.data.success) {
+                    $scope.jobSuccess = 'Job posted successfully! Job ID: ' + response.data.job_id;
+                    $scope.jobData = {};
+                    // Reload stats
+                    $http.get(API_BASE_URL + '/employers/dashboard')
+                        .then(function(res) {
+                            if (res.data.success) {
+                                $scope.job_stats = res.data.job_stats;
+                            }
+                        });
+                    setTimeout(function() {
+                        $scope.showPostJob = false;
+                        $scope.jobSuccess = '';
+                        $scope.$apply();
+                    }, 2000);
+                } else {
+                    $scope.jobError = response.data.message || 'Failed to post job.';
+                }
+            })
+            .catch(function(error) {
+                $scope.jobError = error.data?.message || 'Error posting job.';
+            })
+            .finally(function() {
+                $scope.postingJob = false;
+            });
+    };
+    
+    // Accept application
+    $scope.acceptApp = function(app) {
+        $http.post(API_BASE_URL + '/employers/applications/' + app.id + '/accept')
+            .then(function(response) {
+                if (response.data.success) {
+                    app.status = 'accepted';
+                    // Reload stats
+                    $http.get(API_BASE_URL + '/employers/dashboard')
+                        .then(function(res) {
+                            if (res.data.success) {
+                                $scope.application_stats = res.data.application_stats;
+                            }
+                        });
+                }
+            })
+            .catch(function(error) {
+                alert('Error accepting application');
+            });
+    };
+    
+    // Reject application
+    $scope.rejectApp = function(app) {
+        $http.post(API_BASE_URL + '/employers/applications/' + app.id + '/reject')
+            .then(function(response) {
+                if (response.data.success) {
+                    app.status = 'rejected';
+                }
+            })
+            .catch(function(error) {
+                alert('Error rejecting application');
+            });
+    };
+    
+    // Generate stars
+    $scope.getStars = function(rating) {
+        var stars = '';
+        var fullStars = Math.floor(rating);
+        for (var i = 0; i < fullStars; i++) {
+            stars += '★';
+        }
+        for (var i = fullStars; i < 5; i++) {
+            stars += '☆';
+        }
+        return stars;
+    };
+}]);
+
+
+// =====================================================
+// Admin Employers Controller
+// =====================================================
+app.controller('AdminEmployersController', ['$scope', '$http', '$location', '$window', function($scope, $http, $location, $window) {
+    // Check if admin is logged in
+    var admin = $window.localStorage.getItem('mlgms_admin');
+    if (!admin) {
+        $location.path('/admin-login');
+        return;
+    }
+    
+    $scope.employers = [];
+    $scope.filteredEmployers = [];
+    $scope.stats = {};
+    $scope.filterStatus = 'pending';
+    $scope.loading = true;
+    $scope.showDetails = false;
+    $scope.selectedEmployer = null;
+    $scope.verificationNotes = '';
+    
+    // Load employers
+    $scope.loadEmployers = function() {
+        $scope.loading = true;
+        
+        $http.get(API_BASE_URL + '/admin/employers')
+            .then(function(response) {
+                if (response.data.success) {
+                    $scope.employers = response.data.employers;
+                    $scope.applyFilter();
+                }
+            })
+            .catch(function(error) {
+                console.error('Error loading employers:', error);
+            })
+            .finally(function() {
+                $scope.loading = false;
+            });
+        
+        // Load stats
+        $http.get(API_BASE_URL + '/admin/stats')
+            .then(function(response) {
+                if (response.data.success) {
+                    $scope.stats = response.data.stats.employers;
+                }
+            });
+    };
+    
+    // Set filter
+    $scope.setFilter = function(status) {
+        $scope.filterStatus = status;
+        $scope.applyFilter();
+    };
+    
+    // Apply filter
+    $scope.applyFilter = function() {
+        if ($scope.filterStatus === 'all') {
+            $scope.filteredEmployers = $scope.employers;
+        } else {
+            $scope.filteredEmployers = $scope.employers.filter(function(e) {
+                return e.is_verified === $scope.filterStatus;
+            });
+        }
+    };
+    
+    // View details
+    $scope.viewDetails = function(employer) {
+        $scope.selectedEmployer = employer;
+        $scope.showDetails = true;
+        $scope.verificationNotes = '';
+    };
+    
+    // Verify employer
+    $scope.verifyEmployer = function(employer) {
+        $http.post(API_BASE_URL + '/admin/employers/' + employer.id + '/verify', {
+            notes: $scope.verificationNotes
+        })
+            .then(function(response) {
+                if (response.data.success) {
+                    employer.is_verified = 'verified';
+                    $scope.showDetails = false;
+                    $scope.loadEmployers();
+                }
+            })
+            .catch(function(error) {
+                alert('Error verifying employer');
+            });
+    };
+    
+    // Reject employer
+    $scope.rejectEmployer = function(employer) {
+        if (!confirm('Are you sure you want to reject this employer?')) {
+            return;
+        }
+        
+        $http.post(API_BASE_URL + '/admin/employers/' + employer.id + '/reject', {
+            notes: $scope.verificationNotes
+        })
+            .then(function(response) {
+                if (response.data.success) {
+                    employer.is_verified = 'rejected';
+                    $scope.showDetails = false;
+                    $scope.loadEmployers();
+                }
+            })
+            .catch(function(error) {
+                alert('Error rejecting employer');
+            });
+    };
+    
+    // Navigate
+    $scope.navigateTo = function(path) {
+        $location.path('/' + path);
+    };
+    
+    // Initial load
+    $scope.loadEmployers();
+}]);
+
+
+// =====================================================
+// Uppercase Filter
+// =====================================================
+app.filter('uppercase', function() {
+    return function(input) {
+        return input ? input.toUpperCase() : '';
+    };
+});

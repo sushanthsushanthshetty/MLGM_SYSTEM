@@ -13,7 +13,7 @@
 <div ng-show="!loading">
     <!-- Stats Cards -->
     <div class="row mb-4">
-        <div class="col-md-3 mb-3">
+        <div class="col-md-2 mb-3">
             <div class="card text-white bg-primary">
                 <div class="card-body">
                     <h6 class="card-title">Total Workers</h6>
@@ -21,7 +21,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-2 mb-3">
             <div class="card text-white bg-success">
                 <div class="card-body">
                     <h6 class="card-title">Open Jobs</h6>
@@ -29,15 +29,15 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-2 mb-3">
             <div class="card text-white bg-warning">
                 <div class="card-body">
-                    <h6 class="card-title">Pending Applications</h6>
+                    <h6 class="card-title">Pending Apps</h6>
                     <h2>{{stats.applications.pending || 0}}</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-2 mb-3">
             <div class="card text-white bg-danger">
                 <div class="card-body">
                     <h6 class="card-title">Pending Complaints</h6>
@@ -45,11 +45,27 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-2 mb-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h6 class="card-title">Pending Employers</h6>
+                    <h2>{{stats.employers.pending || 0}}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="card text-white bg-secondary">
+                <div class="card-body">
+                    <h6 class="card-title">Total Employers</h6>
+                    <h2>{{stats.employers.total || 0}}</h2>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Menu Cards -->
     <div class="row">
-        <div class="col-md-4 mb-4">
+        <div class="col-md-3 mb-4">
             <div class="card dashboard-card" ng-click="navigateTo('admin-applications')" style="border-left: 4px solid #17a2b8; cursor: pointer;">
                 <div class="card-body">
                     <div class="card-icon" style="background-color: #17a2b8;">
@@ -60,7 +76,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-4">
+        <div class="col-md-3 mb-4">
             <div class="card dashboard-card" ng-click="navigateTo('admin-complaints')" style="border-left: 4px solid #dc3545; cursor: pointer;">
                 <div class="card-body">
                     <div class="card-icon" style="background-color: #dc3545;">
@@ -71,7 +87,18 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-4">
+        <div class="col-md-3 mb-4">
+            <div class="card dashboard-card" ng-click="navigateTo('admin-employers')" style="border-left: 4px solid #fd7e14; cursor: pointer;">
+                <div class="card-body">
+                    <div class="card-icon" style="background-color: #fd7e14;">
+                        <span>Employers</span>
+                    </div>
+                    <h5 class="card-title">Verify Employers</h5>
+                    <p class="text-muted">Verify employer registrations</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
             <div class="card dashboard-card" ng-click="adminLogout()" style="border-left: 4px solid #6c757d; cursor: pointer;">
                 <div class="card-body">
                     <div class="card-icon" style="background-color: #6c757d;">

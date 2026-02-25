@@ -306,28 +306,109 @@ class Employer:
     """Employer model for companies"""
     
     @staticmethod
-    def get_all(status=None):
+    def generate_employer_id(cursor):
+        """Generate unique employer ID"""
+        cursor.execute("SELECT COALESCE(MAX(CAST(SUBSTRING(employer_id, 4) AS UNSIGNED)), 0) as max_id FROM employers")
+        result = cursor.fetchone()
+        max_id = result['max_id'] if result else 0
+        return f"EMP{str(max_id + 1).zfill(5)}"
+    
+    @staticmethod
+    def create(data):
+        """Create a new employer (registration)"""
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            employer_id = Employer.generate_employer_id(cursor)
+            hashed_password = generate_password_hash(str(data.get('password')))
+            
+            cursor.execute("""
+                INSERT INTO employers (employer_id, company_name, industry, location, 
+                                       contact_person, phone, email, password, 
+                                       gst_number, registration_number, address)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                employer_id,
+                data.get('company_name'),
+                data.get('industry'),
+                data.get('location'),
+                data.get('contact_person'),
+                data.get('phone'),
+                data.get('email'),
+                hashed_password,
+                data.get('gst_number'),
+                data.get('registration_number'),
+                data.get('address')
+            ))
+            conn.commit()
+            emp_id = cursor.lastrowid
+            return {'success': True, 'employer_id': employer_id, 'id': emp_id}
+        except Exception as e:
+            conn.rollback()
+            return {'success': False, 'error': str(e)}
+        finally:
+            conn.close()
+    
+    @staticmethod
+    def authenticate(employer_id, password):
+        """Authenticate employer by employer_id and password"""
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT * FROM employers 
+                WHERE employer_id = %s
+            """, (employer_id,))
+            result = cursor.fetchone()
+            
+            if result and check_password_hash(result['password'], password):
+                return result
+            return None
+        finally:
+            conn.close()
+    
+    @staticmethod
+    def get_by_employer_id(employer_id):
+        """Get employer by employer_id"""
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT * FROM employers 
+                WHERE employer_id = %s
+            """, (employer_id,))
+            result = cursor.fetchone()
+            return result
+        finally:
+            conn.close()
+    
+    @staticmethod
+    def get_all(status=None, verification_status=None):
         """Get all employers"""
         conn = get_connection()
         try:
             cursor = conn.cursor()
+            
+            query = """
+                SELECT id, employer_id, company_name as name, industry as type, location, 
+                       contact_person, phone, email, status, is_verified, verification_notes,
+                       rating, workers_count as workers, created_at
+                FROM employers 
+                WHERE 1=1
+            """
+            params = []
+            
             if status:
-                cursor.execute("""
-                    SELECT id, company_name as name, industry as type, location, 
-                           contact_person, phone, email, status, rating, 
-                           workers_count as workers, created_at
-                    FROM employers 
-                    WHERE status = %s
-                    ORDER BY rating DESC
-                """, (status,))
-            else:
-                cursor.execute("""
-                    SELECT id, company_name as name, industry as type, location, 
-                           contact_person, phone, email, status, rating, 
-                           workers_count as workers, created_at
-                    FROM employers 
-                    ORDER BY rating DESC
-                """)
+                query += " AND status = %s"
+                params.append(status)
+            
+            if verification_status:
+                query += " AND is_verified = %s"
+                params.append(verification_status)
+            
+            query += " ORDER BY created_at DESC"
+            
+            cursor.execute(query, params)
             results = cursor.fetchall()
             return results
         finally:
@@ -340,12 +421,82 @@ class Employer:
         try:
             cursor = conn.cursor()
             cursor.execute("""
-                SELECT id, company_name as name, industry as type, location, 
-                       contact_person, phone, email, status, rating, 
-                       workers_count as workers, created_at
+                SELECT id, employer_id, company_name as name, industry as type, location, 
+                       contact_person, phone, email, status, is_verified, verification_notes,
+                       rating, workers_count as workers, created_at, gst_number, 
+                       registration_number, address
                 FROM employers 
                 WHERE id = %s
             """, (employer_id,))
+            result = cursor.fetchone()
+            return result
+        finally:
+            conn.close()
+    
+    @staticmethod
+    def update_verification(employer_id, verification_status, notes=None, admin_id=None):
+        """Update employer verification status"""
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            
+            if verification_status == 'verified':
+                cursor.execute("""
+                    UPDATE employers 
+                    SET is_verified = %s, verification_notes = %s, 
+                        verified_at = NOW(), verified_by = %s,
+                        status = 'active'
+                    WHERE id = %s
+                """, (verification_status, notes, admin_id, employer_id))
+            else:
+                cursor.execute("""
+                    UPDATE employers 
+                    SET is_verified = %s, verification_notes = %s, 
+                        verified_at = NOW(), verified_by = %s
+                    WHERE id = %s
+                """, (verification_status, notes, admin_id, employer_id))
+            
+            conn.commit()
+            return {'success': True, 'message': 'Verification status updated'}
+        except Exception as e:
+            conn.rollback()
+            return {'success': False, 'error': str(e)}
+        finally:
+            conn.close()
+    
+    @staticmethod
+    def get_pending_verifications():
+        """Get all employers pending verification"""
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, employer_id, company_name, industry, location, 
+                       contact_person, phone, email, gst_number, 
+                       registration_number, address, created_at
+                FROM employers 
+                WHERE is_verified = 'pending'
+                ORDER BY created_at ASC
+            """)
+            results = cursor.fetchall()
+            return results
+        finally:
+            conn.close()
+    
+    @staticmethod
+    def get_verification_stats():
+        """Get employer verification statistics"""
+        conn = get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 
+                    COUNT(*) as total,
+                    SUM(CASE WHEN is_verified = 'pending' THEN 1 ELSE 0 END) as pending,
+                    SUM(CASE WHEN is_verified = 'verified' THEN 1 ELSE 0 END) as verified,
+                    SUM(CASE WHEN is_verified = 'rejected' THEN 1 ELSE 0 END) as rejected
+                FROM employers
+            """)
             result = cursor.fetchone()
             return result
         finally:

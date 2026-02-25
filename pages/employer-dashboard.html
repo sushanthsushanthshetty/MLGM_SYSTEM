@@ -1,0 +1,252 @@
+<!-- Employer Dashboard Page -->
+<h2 class="page-title">Employer Dashboard</h2>
+
+<!-- Loading indicator -->
+<div ng-show="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading dashboard...</p>
+</div>
+
+<!-- Dashboard Content -->
+<div ng-show="!loading">
+    <!-- Company Info Card -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 class="mb-1">{{employer.company_name}}</h4>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-id-badge me-2"></i>Employer ID: {{employer.employer_id}}
+                    </p>
+                    <p class="text-muted mb-0" ng-show="employer.industry">
+                        <i class="fas fa-industry me-2"></i>{{employer.industry}}
+                    </p>
+                    <p class="text-muted mb-0" ng-show="employer.location">
+                        <i class="fas fa-map-marker-alt me-2"></i>{{employer.location}}
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="rating-display">
+                        <span class="text-warning">{{getStars(employer.rating)}}</span>
+                        <span class="ms-2">{{employer.rating | number:1}}</span>
+                    </div>
+                    <small class="text-muted">Workers Employed: {{employer.workers_count}}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h6 class="card-title">Total Jobs</h6>
+                    <h2>{{job_stats.total_jobs || 0}}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h6 class="card-title">Open Jobs</h6>
+                    <h2>{{job_stats.open_jobs || 0}}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h6 class="card-title">Pending Applications</h6>
+                    <h2>{{application_stats.pending_applications || 0}}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h6 class="card-title">Total Applications</h6>
+                    <h2>{{application_stats.total_applications || 0}}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Cards -->
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card dashboard-card" ng-click="showPostJob = true" style="border-left: 4px solid #28a745; cursor: pointer;">
+                <div class="card-body">
+                    <div class="card-icon" style="background-color: #28a745;">
+                        <span>+</span>
+                    </div>
+                    <h5 class="card-title">Post New Job</h5>
+                    <p class="text-muted">Create a new job listing</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card dashboard-card" ng-click="navigateTo('employer-jobs')" style="border-left: 4px solid #17a2b8; cursor: pointer;">
+                <div class="card-body">
+                    <div class="card-icon" style="background-color: #17a2b8;">
+                        <span>Jobs</span>
+                    </div>
+                    <h5 class="card-title">My Jobs</h5>
+                    <p class="text-muted">Manage job listings</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card dashboard-card" ng-click="navigateTo('employer-applications')" style="border-left: 4px solid #6610f2; cursor: pointer;">
+                <div class="card-body">
+                    <div class="card-icon" style="background-color: #6610f2;">
+                        <span>Apps</span>
+                    </div>
+                    <h5 class="card-title">Applications</h5>
+                    <p class="text-muted">Review job applications</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card dashboard-card" ng-click="logout()" style="border-left: 4px solid #6c757d; cursor: pointer;">
+                <div class="card-body">
+                    <div class="card-icon" style="background-color: #6c757d;">
+                        <span>Out</span>
+                    </div>
+                    <h5 class="card-title">Logout</h5>
+                    <p class="text-muted">Exit dashboard</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post Job Modal -->
+    <div ng-show="showPostJob" class="modal-overlay" ng-click="showPostJob = false">
+        <div class="modal-content" ng-click="$event.stopPropagation()" style="max-width: 600px;">
+            <div class="card">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Post New Job</h5>
+                    <button type="button" class="btn-close btn-close-white" ng-click="showPostJob = false"></button>
+                </div>
+                <div class="card-body">
+                    <form name="jobForm" ng-submit="postJob()" novalidate>
+                        <div class="mb-3">
+                            <label class="form-label">Job Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="title" 
+                                   ng-model="jobData.title" required
+                                   placeholder="e.g., Electrician for Building Construction">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" ng-model="jobData.description" rows="3"
+                                      placeholder="Job description and requirements"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Skill Required <span class="text-danger">*</span></label>
+                                <select class="form-select" name="skill_required" 
+                                        ng-model="jobData.skill_required" required>
+                                    <option value="">Select Skill</option>
+                                    <option value="electrician">Electrician</option>
+                                    <option value="plumber">Plumber</option>
+                                    <option value="carpenter">Carpenter</option>
+                                    <option value="mason">Mason</option>
+                                    <option value="painter">Painter</option>
+                                    <option value="welder">Welder</option>
+                                    <option value="driver">Driver</option>
+                                    <option value="cook">Cook</option>
+                                    <option value="cleaner">Cleaner</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Location <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="location" 
+                                       ng-model="jobData.location" required
+                                       placeholder="Job location">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Wage Per Day (₹)</label>
+                                <input type="number" class="form-control" ng-model="jobData.wage_per_day"
+                                       placeholder="e.g., 500">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Duration (Days)</label>
+                                <input type="number" class="form-control" ng-model="jobData.duration_days"
+                                       placeholder="e.g., 30">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Workers Needed</label>
+                                <input type="number" class="form-control" ng-model="jobData.workers_needed"
+                                       placeholder="e.g., 5">
+                            </div>
+                        </div>
+
+                        <div ng-show="jobError" class="alert alert-danger">{{jobError}}</div>
+                        <div ng-show="jobSuccess" class="alert alert-success">{{jobSuccess}}</div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success" ng-disabled="postingJob">
+                                <span ng-show="postingJob">
+                                    <span class="spinner-border spinner-border-sm me-1"></span>Posting...
+                                </span>
+                                <span ng-show="!postingJob">Post Job</span>
+                            </button>
+                            <button type="button" class="btn btn-secondary" ng-click="showPostJob = false">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Applications -->
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Recent Applications</h5>
+            <button class="btn btn-sm btn-primary" ng-click="navigateTo('employer-applications')">View All</button>
+        </div>
+        <div class="card-body">
+            <div ng-show="recentApplications.length === 0" class="text-center py-4 text-muted">
+                <i class="fas fa-inbox" style="font-size: 2rem;"></i>
+                <p class="mt-2">No applications yet</p>
+            </div>
+            <div ng-show="recentApplications.length > 0" class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Worker</th>
+                            <th>Job Title</th>
+                            <th>Skill</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="app in recentApplications">
+                            <td>{{app.worker_name}} ({{app.migrant_id}})</td>
+                            <td>{{app.job_title}}</td>
+                            <td>{{app.skill}}</td>
+                            <td>{{app.phone}}</td>
+                            <td><span class="status-{{app.status}}">{{app.status | capitalize}}</span></td>
+                            <td>
+                                <button ng-show="app.status === 'pending'" class="btn btn-sm btn-success me-1" 
+                                        ng-click="acceptApp(app)">Accept</button>
+                                <button ng-show="app.status === 'pending'" class="btn btn-sm btn-danger" 
+                                        ng-click="rejectApp(app)">Reject</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

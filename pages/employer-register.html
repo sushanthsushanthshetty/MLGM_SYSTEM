@@ -1,0 +1,203 @@
+<!-- Employer Registration Page -->
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg mt-4">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">Employer Registration</h4>
+                    <small>Register your company to post jobs</small>
+                </div>
+                <div class="card-body">
+                    <!-- Success Message -->
+                    <div ng-show="registrationSuccess" class="text-center py-4">
+                        <div class="success-icon mb-3">
+                            <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                        </div>
+                        <h5 class="text-success">Registration Successful!</h5>
+                        <p class="mt-3">Your Employer ID: <strong class="text-primary">{{employerId}}</strong></p>
+                        <div class="alert alert-info mt-3">
+                            <strong>Important:</strong> Your account is pending verification. 
+                            You will be able to login once the admin verifies your details.
+                        </div>
+                        <button class="btn btn-primary mt-3" ng-click="goToLogin()">
+                            Go to Login
+                        </button>
+                    </div>
+
+                    <!-- Registration Form -->
+                    <form ng-show="!registrationSuccess" name="registerForm" ng-submit="register()" novalidate>
+                        <!-- Company Information -->
+                        <h6 class="text-muted mb-3">Company Information</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Company Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="company_name" 
+                                   ng-model="formData.company_name" required
+                                   placeholder="Enter company name">
+                            <div ng-show="registerForm.$submitted || registerForm.company_name.$touched">
+                                <small class="text-danger" ng-show="registerForm.company_name.$error.required">
+                                    Company name is required
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Industry</label>
+                                <select class="form-select" ng-model="formData.industry">
+                                    <option value="">Select Industry</option>
+                                    <option value="Construction">Construction</option>
+                                    <option value="Manufacturing">Manufacturing</option>
+                                    <option value="Textile">Textile</option>
+                                    <option value="Agriculture">Agriculture</option>
+                                    <option value="Hospitality">Hospitality</option>
+                                    <option value="Infrastructure">Infrastructure</option>
+                                    <option value="Retail">Retail</option>
+                                    <option value="Transportation">Transportation</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Location <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" ng-model="formData.location" 
+                                       placeholder="City, State">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Company Address</label>
+                            <textarea class="form-control" ng-model="formData.address" rows="2"
+                                      placeholder="Full address"></textarea>
+                        </div>
+
+                        <!-- Business Details -->
+                        <h6 class="text-muted mb-3 mt-4">Business Details</h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">GST Number</label>
+                                <input type="text" class="form-control" ng-model="formData.gst_number"
+                                       placeholder="GSTIN">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Registration Number</label>
+                                <input type="text" class="form-control" ng-model="formData.registration_number"
+                                       placeholder="Company registration no.">
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <h6 class="text-muted mb-3 mt-4">Contact Information</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Contact Person <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="contact_person" 
+                                   ng-model="formData.contact_person" required
+                                   placeholder="Full name of contact person">
+                            <div ng-show="registerForm.$submitted || registerForm.contact_person.$touched">
+                                <small class="text-danger" ng-show="registerForm.contact_person.$error.required">
+                                    Contact person name is required
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Phone <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" name="phone" 
+                                       ng-model="formData.phone" required
+                                       ng-pattern="/^[0-9]{10}$/"
+                                       placeholder="10-digit mobile number">
+                                <div ng-show="registerForm.$submitted || registerForm.phone.$touched">
+                                    <small class="text-danger" ng-show="registerForm.phone.$error.required">
+                                        Phone number is required
+                                    </small>
+                                    <small class="text-danger" ng-show="registerForm.phone.$error.pattern">
+                                        Enter valid 10-digit phone number
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" name="email" 
+                                       ng-model="formData.email" required
+                                       placeholder="company@example.com">
+                                <div ng-show="registerForm.$submitted || registerForm.email.$touched">
+                                    <small class="text-danger" ng-show="registerForm.email.$error.required">
+                                        Email is required
+                                    </small>
+                                    <small class="text-danger" ng-show="registerForm.email.$error.email">
+                                        Enter valid email address
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Security -->
+                        <h6 class="text-muted mb-3 mt-4">Account Security</h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Password <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" name="password" 
+                                       ng-model="formData.password" required
+                                       ng-minlength="6"
+                                       placeholder="Min 6 characters">
+                                <div ng-show="registerForm.$submitted || registerForm.password.$touched">
+                                    <small class="text-danger" ng-show="registerForm.password.$error.required">
+                                        Password is required
+                                    </small>
+                                    <small class="text-danger" ng-show="registerForm.password.$error.minlength">
+                                        Password must be at least 6 characters
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" name="confirm_password" 
+                                       ng-model="formData.confirm_password" required
+                                       ng-compare="formData.password"
+                                       placeholder="Re-enter password">
+                                <div ng-show="registerForm.$submitted || registerForm.confirm_password.$touched">
+                                    <small class="text-danger" ng-show="formData.password !== formData.confirm_password">
+                                        Passwords do not match
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div ng-show="errorMessage" class="alert alert-danger mt-3">
+                            {{errorMessage}}
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg" 
+                                    ng-disabled="loading">
+                                <span ng-show="loading">
+                                    <span class="spinner-border spinner-border-sm me-2"></span>
+                                    Registering...
+                                </span>
+                                <span ng-show="!loading">Register Company</span>
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                Already registered? <a href="#!/employer-login">Login here</a>
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Back to Home -->
+            <div class="text-center mt-3 mb-4">
+                <a href="#!/" class="text-muted">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

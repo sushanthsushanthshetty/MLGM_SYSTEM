@@ -1,0 +1,249 @@
+<!-- Admin Employer Verification Page -->
+<h2 class="page-title">Employer Verification</h2>
+
+<!-- Loading indicator -->
+<div ng-show="loading" class="text-center my-5">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading employers...</p>
+</div>
+
+<!-- Content -->
+<div ng-show="!loading">
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h6 class="card-title">Pending Verification</h6>
+                    <h2>{{stats.pending || 0}}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h6 class="card-title">Verified</h6>
+                    <h2>{{stats.verified || 0}}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-danger">
+                <div class="card-body">
+                    <h6 class="card-title">Rejected</h6>
+                    <h2>{{stats.rejected || 0}}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h6 class="card-title">Total Employers</h6>
+                    <h2>{{stats.total || 0}}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+            <a class="nav-link" ng-class="{'active': filterStatus === 'pending'}" 
+               ng-click="setFilter('pending')" href="#">
+                Pending <span class="badge bg-warning text-dark ms-1">{{stats.pending || 0}}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" ng-class="{'active': filterStatus === 'verified'}" 
+               ng-click="setFilter('verified')" href="#">
+                Verified <span class="badge bg-success ms-1">{{stats.verified || 0}}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" ng-class="{'active': filterStatus === 'rejected'}" 
+               ng-click="setFilter('rejected')" href="#">
+                Rejected <span class="badge bg-danger ms-1">{{stats.rejected || 0}}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" ng-class="{'active': filterStatus === 'all'}" 
+               ng-click="setFilter('all')" href="#">
+                All
+            </a>
+        </li>
+    </ul>
+
+    <!-- Employers List -->
+    <div class="card">
+        <div class="card-body">
+            <div ng-show="filteredEmployers.length === 0" class="text-center py-4 text-muted">
+                <i class="fas fa-building" style="font-size: 2rem;"></i>
+                <p class="mt-2">No employers found</p>
+            </div>
+            
+            <div ng-show="filteredEmployers.length > 0" class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Employer ID</th>
+                            <th>Company Name</th>
+                            <th>Industry</th>
+                            <th>Contact</th>
+                            <th>Phone</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="employer in filteredEmployers">
+                            <td><strong>{{employer.employer_id}}</strong></td>
+                            <td>{{employer.company_name}}</td>
+                            <td>{{employer.industry || '-'}}</td>
+                            <td>{{employer.contact_person}}</td>
+                            <td>{{employer.phone}}</td>
+                            <td>{{employer.location || '-'}}</td>
+                            <td>
+                                <span ng-class="{
+                                    'badge bg-warning text-dark': employer.is_verified === 'pending',
+                                    'badge bg-success': employer.is_verified === 'verified',
+                                    'badge bg-danger': employer.is_verified === 'rejected'
+                                }">{{employer.is_verified | capitalize}}</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-info me-1" ng-click="viewDetails(employer)">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                <button ng-show="employer.is_verified === 'pending'" 
+                                        class="btn btn-sm btn-success me-1" 
+                                        ng-click="verifyEmployer(employer)">
+                                    <i class="fas fa-check"></i> Verify
+                                </button>
+                                <button ng-show="employer.is_verified === 'pending'" 
+                                        class="btn btn-sm btn-danger" 
+                                        ng-click="rejectEmployer(employer)">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Employer Details Modal -->
+<div ng-show="showDetails" class="modal-overlay" ng-click="showDetails = false">
+    <div class="modal-content" ng-click="$event.stopPropagation()" style="max-width: 700px;">
+        <div class="card">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Employer Details</h5>
+                <button type="button" class="btn-close btn-close-white" ng-click="showDetails = false"></button>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="text-muted small">Employer ID</label>
+                        <p><strong>{{selectedEmployer.employer_id}}</strong></p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Verification Status</label>
+                        <p>
+                            <span ng-class="{
+                                'badge bg-warning text-dark': selectedEmployer.is_verified === 'pending',
+                                'badge bg-success': selectedEmployer.is_verified === 'verified',
+                                'badge bg-danger': selectedEmployer.is_verified === 'rejected'
+                            }">{{selectedEmployer.is_verified | capitalize}}</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="text-muted small">Company Name</label>
+                        <p><strong>{{selectedEmployer.company_name}}</strong></p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Industry</label>
+                        <p>{{selectedEmployer.industry || '-'}}</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="text-muted small">Contact Person</label>
+                        <p>{{selectedEmployer.contact_person}}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Location</label>
+                        <p>{{selectedEmployer.location || '-'}}</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="text-muted small">Phone</label>
+                        <p>{{selectedEmployer.phone}}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Email</label>
+                        <p>{{selectedEmployer.email}}</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="text-muted small">GST Number</label>
+                        <p>{{selectedEmployer.gst_number || '-'}}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small">Registration Number</label>
+                        <p>{{selectedEmployer.registration_number || '-'}}</p>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-muted small">Address</label>
+                    <p>{{selectedEmployer.address || '-'}}</p>
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-muted small">Registered On</label>
+                    <p>{{selectedEmployer.created_at | date:'medium'}}</p>
+                </div>
+
+                <div ng-show="selectedEmployer.verification_notes">
+                    <label class="text-muted small">Verification Notes</label>
+                    <p>{{selectedEmployer.verification_notes}}</p>
+                </div>
+
+                <!-- Action Buttons for Pending -->
+                <div ng-show="selectedEmployer.is_verified === 'pending'" class="mt-4 pt-3 border-top">
+                    <div class="mb-3">
+                        <label class="form-label">Verification Notes (Optional)</label>
+                        <textarea class="form-control" ng-model="verificationNotes" rows="2"
+                                  placeholder="Add any notes about this verification"></textarea>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-success" ng-click="verifyEmployer(selectedEmployer)">
+                            <i class="fas fa-check me-1"></i> Verify Employer
+                        </button>
+                        <button class="btn btn-danger" ng-click="rejectEmployer(selectedEmployer)">
+                            <i class="fas fa-times me-1"></i> Reject Employer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Back Button -->
+<div class="mt-4">
+    <button class="btn btn-secondary" ng-click="navigateTo('admin-dashboard')">
+        <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+    </button>
+</div>

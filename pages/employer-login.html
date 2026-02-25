@@ -1,0 +1,105 @@
+<!-- Employer Login Page -->
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-lg mt-5">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">Employer Login</h4>
+                    <small>Access your employer dashboard</small>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Pending Verification Message -->
+                    <div ng-show="pendingVerification" class="text-center py-3">
+                        <div class="mb-3">
+                            <i class="fas fa-clock text-warning" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="text-warning">Account Pending Verification</h5>
+                        <p class="text-muted mt-2">
+                            Your account is currently under review. You will be able to login 
+                            once the admin verifies your company details.
+                        </p>
+                        <p class="small">
+                            Employer ID: <strong>{{employerId}}</strong>
+                        </p>
+                        <button class="btn btn-outline-primary mt-2" ng-click="checkAgain()">
+                            Check Status
+                        </button>
+                    </div>
+
+                    <!-- Rejected Message -->
+                    <div ng-show="rejectedAccount" class="text-center py-3">
+                        <div class="mb-3">
+                            <i class="fas fa-times-circle text-danger" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="text-danger">Account Verification Rejected</h5>
+                        <p class="text-muted mt-2">
+                            Unfortunately, your account verification was rejected.
+                            Please contact support for more information.
+                        </p>
+                        <p class="small">
+                            Employer ID: <strong>{{employerId}}</strong>
+                        </p>
+                    </div>
+
+                    <!-- Login Form -->
+                    <form ng-show="!pendingVerification && !rejectedAccount" name="loginForm" ng-submit="login()" novalidate>
+                        <div class="mb-3">
+                            <label class="form-label">Employer ID</label>
+                            <input type="text" class="form-control" name="employer_id" 
+                                   ng-model="loginData.employer_id" required
+                                   placeholder="e.g., EMP00001"
+                                   ng-uppercase>
+                            <div ng-show="loginForm.$submitted || loginForm.employer_id.$touched">
+                                <small class="text-danger" ng-show="loginForm.employer_id.$error.required">
+                                    Employer ID is required
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" name="password" 
+                                   ng-model="loginData.password" required
+                                   placeholder="Enter your password">
+                            <div ng-show="loginForm.$submitted || loginForm.password.$touched">
+                                <small class="text-danger" ng-show="loginForm.password.$error.required">
+                                    Password is required
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div ng-show="errorMessage" class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i>{{errorMessage}}
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg" 
+                                    ng-disabled="loading">
+                                <span ng-show="loading">
+                                    <span class="spinner-border spinner-border-sm me-2"></span>
+                                    Logging in...
+                                </span>
+                                <span ng-show="!loading">Login</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <small class="text-muted">
+                            New employer? <a href="#!/employer-register">Register here</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back to Home -->
+            <div class="text-center mt-3 mb-4">
+                <a href="#!/" class="text-muted">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

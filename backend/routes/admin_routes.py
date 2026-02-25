@@ -345,6 +345,18 @@ def get_admin_stats():
         complaint_stats = cursor.fetchone()
         stats['complaints'] = complaint_stats
         
+        # Employer verification stats
+        cursor.execute("""
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN is_verified = 'pending' THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN is_verified = 'verified' THEN 1 ELSE 0 END) as verified,
+                SUM(CASE WHEN is_verified = 'rejected' THEN 1 ELSE 0 END) as rejected
+            FROM employers
+        """)
+        employer_stats = cursor.fetchone()
+        stats['employers'] = employer_stats
+        
         conn.close()
         
         return jsonify({
@@ -356,5 +368,212 @@ def get_admin_stats():
         return jsonify({
             'success': False,
             'message': 'Error fetching stats',
+            'error': str(e)
+        }), 500
+
+
+# =====================================================
+# Employer Verification Management
+# =====================================================
+
+@admin_bp.route('/employers', methods=['GET'])
+def get_all_employers():
+    """Get all employers for admin"""
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        verification_filter = request.args.get('verification')
+        
+        query = """
+            SELECT id, employer_id, company_name, industry, location, 
+                   contact_person, phone, email, gst_number, registration_number,
+                   address, status, is_verified, verification_notes, 
+                   rating, workers_count, created_at, verified_at
+            FROM employers
+            WHERE 1=1
+        """
+        params = []
+        
+        if verification_filter:
+            query += " AND is_verified = %s"
+            params.append(verification_filter)
+        
+        query += " ORDER BY created_at DESC"
+        
+        cursor.execute(query, params)
+        employers = cursor.fetchall()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'employers': employers,
+            'count': len(employers)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': 'Error fetching employers',
+            'error': str(e)
+        }), 500
+
+
+@admin_bp.route('/employers/pending', methods=['GET'])
+def get_pending_employers():
+    """Get employers pending verification"""
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT id, employer_id, company_name, industry, location, 
+                   contact_person, phone, email, gst_number, registration_number,
+                   address, created_at
+            FROM employers
+            WHERE is_verified = 'pending'
+            ORDER BY created_at ASC
+        """)
+        
+        employers = cursor.fetchall()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'employers': employers,
+            'count': len(employers)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': 'Error fetching pending employers',
+            'error': str(e)
+        }), 500
+
+
+@admin_bp.route('/employers/<int:employer_id>', methods=['GET'])
+def get_employer_details(employer_id):
+    """Get employer details for verification"""
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT * FROM employers WHERE id = %s
+        """, (employer_id,))
+        
+        employer = cursor.fetchone()
+        conn.close()
+        
+        if not employer:
+            return jsonify({
+                'success': False,
+                'message': 'Employer not found'
+            }), 404
+        
+        return jsonify({
+            'success': True,
+            'employer': employer
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': 'Error fetching employer details',
+            'error': str(e)
+        }), 500
+
+
+@admin_bp.route('/employers/<int:employer_id>/verify', methods=['POST'])
+def verify_employer(employer_id):
+    """Verify an employer"""
+    try:
+        data = request.get_json() or {}
+        notes = data.get('notes', '')
+        
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        # Check if employer exists
+        cursor.execute("SELECT * FROM employers WHERE id = %s", (employer_id,))
+        employer = cursor.fetchone()
+        
+        if not employer:
+            conn.close()
+            return jsonify({
+                'success': False,
+                'message': 'Employer not found'
+            }), 404
+        
+        # Update verification status
+        cursor.execute("""
+            UPDATE employers 
+            SET is_verified = 'verified', 
+                verification_notes = %s,
+                verified_at = NOW(),
+                status = 'active'
+            WHERE id = %s
+        """, (notes, employer_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Employer verified successfully'
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': 'Error verifying employer',
+            'error': str(e)
+        }), 500
+
+
+@admin_bp.route('/employers/<int:employer_id>/reject', methods=['POST'])
+def reject_employer(employer_id):
+    """Reject an employer"""
+    try:
+        data = request.get_json() or {}
+        notes = data.get('notes', '')
+        
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        # Check if employer exists
+        cursor.execute("SELECT * FROM employers WHERE id = %s", (employer_id,))
+        employer = cursor.fetchone()
+        
+        if not employer:
+            conn.close()
+            return jsonify({
+                'success': False,
+                'message': 'Employer not found'
+            }), 404
+        
+        # Update verification status
+        cursor.execute("""
+            UPDATE employers 
+            SET is_verified = 'rejected', 
+                verification_notes = %s,
+                verified_at = NOW(),
+                status = 'inactive'
+            WHERE id = %s
+        """, (notes, employer_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Employer rejected'
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': 'Error rejecting employer',
             'error': str(e)
         }), 500

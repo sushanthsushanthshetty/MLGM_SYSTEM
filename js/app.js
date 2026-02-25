@@ -70,6 +70,22 @@ app.config(['$routeProvider', function($routeProvider) {
             templateUrl: 'pages/admin-complaints.html',
             controller: 'AdminComplaintsController'
         })
+        .when('/admin-employers', {
+            templateUrl: 'pages/admin-employers.html',
+            controller: 'AdminEmployersController'
+        })
+        .when('/employer-register', {
+            templateUrl: 'pages/employer-register.html',
+            controller: 'EmployerRegisterController'
+        })
+        .when('/employer-login', {
+            templateUrl: 'pages/employer-login.html',
+            controller: 'EmployerLoginController'
+        })
+        .when('/employer-dashboard', {
+            templateUrl: 'pages/employer-dashboard.html',
+            controller: 'EmployerDashboardController'
+        })
         .otherwise({
             redirectTo: '/'
         });
